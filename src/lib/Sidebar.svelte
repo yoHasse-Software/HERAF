@@ -1,27 +1,8 @@
 <script lang="ts">
-	import { X, ChevronRight, ExternalLink, Tag, Calendar, User, Eye, Shield, Users, FileText, Zap, Archive, ArrowRight, Target, Layers, Map, Compass, AlertCircle, Puzzle, BookOpen, Navigation } from '@lucide/svelte';
+	import { X, ChevronRight, ExternalLink, Tag, Calendar, User } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
-	import { getSidebarContext, isPrincipleContent, isConceptContent, getContentSummary } from '$lib/sidebar-state.svelte';
+	import { getSidebarContext, getContentSummary } from '$lib/sidebar-state.svelte';
 	import type { SidebarContent } from '$lib/sidebar-state.svelte';
-	import { marked } from 'marked';
-	
-	// Icon mapping for concepts
-	const iconMap = {
-		'Archive': Archive,
-		'ArrowRight': ArrowRight,
-		'Target': Target,
-		'FileTemplate': BookOpen,
-		'Layers': Layers,
-		'Map': Map,
-		'Compass': Compass,
-		'Guide': Navigation,
-		'Shield': Shield,
-		'Users': Users,
-		'AlertCircle': AlertCircle,
-		'Eye': Eye,
-		'FileText': FileText,
-		'Puzzle': Puzzle
-	};
 	
 	const sidebar = getSidebarContext();
 	
@@ -29,6 +10,24 @@
 	let isOpen = $derived(sidebar.isOpen);
 	let content = $derived(sidebar.content);
 	let hasContent = $derived(sidebar.hasContent);
+	
+	// Helper function to get category color classes
+	function getCategoryClasses(color?: string) {
+		switch (color) {
+			case 'blue':
+				return 'bg-blue-100 text-blue-800';
+			case 'green':
+				return 'bg-green-100 text-green-800';
+			case 'purple':
+				return 'bg-purple-100 text-purple-800';
+			case 'red':
+				return 'bg-red-100 text-red-800';
+			case 'yellow':
+				return 'bg-yellow-100 text-yellow-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
+		}
+	}
 	
 	function handleClose() {
 		sidebar.close();
@@ -50,6 +49,7 @@
 		}
 	}
 </script>
+
 
 <svelte:window on:keydown={handleKeyDown} />
 
@@ -89,69 +89,70 @@
 	<!-- Content -->
 	{#if content}
 		<div class="flex-1 overflow-y-auto">
-			<!-- Content Type Indicator -->
-			<div class="p-4 bg-gray-50 border-b">
-				<div class="flex items-center text-sm text-gray-600">
-					{#if content.type === 'principle'}
-						<Tag class="w-4 h-4 mr-2" />
-						Arkitekturprincip
-					{:else if content.type === 'concept'}
-						<User class="w-4 h-4 mr-2" />
-						Koncept
-					{:else}
+			<!-- Category Indicator -->
+			{#if content.categoryLabel}
+				<div class="p-4 bg-gray-50 border-b">
+					<div class="flex items-center text-sm">
 						<ExternalLink class="w-4 h-4 mr-2" />
-						Information
-					{/if}
-				</div>
-			</div>
-			
-			<!-- Metadata for Principles -->
-			{#if isPrincipleContent(content)}
-				<div class="p-4 border-b">
-					<div class="flex items-center justify-between mb-3">
-						<span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-							{content.data.metadata.status}
+						<span class="text-xs font-medium px-2 py-1 rounded-full {getCategoryClasses(content.categoryColor)}">
+							{content.categoryLabel}
 						</span>
-						{#if content.data.metadata.date}
+					</div>
+				</div>
+			{/if}
+			
+			<!-- Metadata Section -->
+			{#if content.metadata}
+				<div class="p-4 border-b">
+					<!-- Status/Category badges -->
+					<div class="flex items-center justify-start mb-3 gap-2">
+                        {#if content.metadata.header}
+                            <h1 class="">{content.metadata.header}</h1>
+                        {/if}
+						{#if content.metadata.status}
+							<span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+								{content.metadata.status}
+							</span>
+						{/if}
+						{#if content.metadata.date}
 							<div class="flex items-center text-xs text-gray-500">
 								<Calendar class="w-3 h-3 mr-1" />
-								{content.data.metadata.date}
+								{new Date(content.metadata.date).toLocaleDateString('sv-SE')}
 							</div>
 						{/if}
 					</div>
 					
-					{#if content.data.metadata.tags.length > 0}
-						<div>
+					<!-- Tags -->
+					{#if content.metadata.tags && content.metadata.tags.length > 0}
+						<div class="mb-3">
 							<h4 class="text-xs font-medium text-gray-700 mb-2">Taggar</h4>
 							<div class="flex flex-wrap gap-1">
-								{#each content.data.metadata.tags as tag (tag)}
+								{#each content.metadata.tags as tag (tag)}
 									<span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">{tag}</span>
 								{/each}
 							</div>
 						</div>
 					{/if}
-				</div>
-			{/if}
-			
-			<!-- Metadata for Concepts -->
-			{#if isConceptContent(content)}
-				<div class="p-4 border-b">
-					{#if content.data.metadata.category}
-						<div class="mb-3">
-							<span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-800">
-								{content.data.metadata.category}
-							</span>
-						</div>
-					{/if}
 					
-					{#if content.data.metadata.examples && content.data.metadata.examples.length > 0}
-						<div>
+					<!-- Examples -->
+					{#if content.metadata.examples && content.metadata.examples.length > 0}
+						<div class="mb-3">
 							<h4 class="text-xs font-medium text-gray-700 mb-2">Exempel</h4>
 							<div class="space-y-1">
-								{#each content.data.metadata.examples as example (example)}
+								{#each content.metadata.examples as example (example)}
 									<div class="text-xs text-gray-600">• {example}</div>
 								{/each}
 							</div>
+						</div>
+					{/if}
+					
+					<!-- Category (for concepts) -->
+					{#if content.metadata.category}
+						<div class="mb-3">
+							<h4 class="text-xs font-medium text-gray-700 mb-2">Kategori</h4>
+							<span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+								{content.metadata.category}
+							</span>
 						</div>
 					{/if}
 				</div>
@@ -161,7 +162,7 @@
 			<div class="p-4">
 				{#if content.htmlContent}
 					<!-- Content is sanitized through marked markdown processor -->
-					<div class="prose prose-sm max-w-none prose-headings:text-gray-900 prose-a:text-[#0D3B4F] prose-a:no-underline hover:prose-a:underline">
+					<div class="sidebar-content">
 						{@html content.htmlContent}
 					</div>
 				{:else if content.content}
@@ -177,57 +178,48 @@
 		</div>
 		
 		<!-- Footer with Actions -->
-		<footer class="border-t border-gray-200 p-4 bg-gray-50">
-			{#if isPrincipleContent(content)}
-				<div class="space-y-2">
-					{#if content.data.metadata.references.length > 0}
-						<div>
-							<h5 class="text-xs font-medium text-gray-700 mb-1">Relaterade principer</h5>
-							<div class="flex flex-wrap gap-1">
-								{#each content.data.metadata.references as reference (reference)}
-									<span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">{reference}</span>
-								{/each}
-							</div>
+		{#if content.footerContent || content.footerHref || (content.metadata?.relationships && content.metadata.relationships.length > 0) || (content.metadata?.references && content.metadata.references.length > 0)}
+			<footer class="border-t border-gray-200 p-4 bg-gray-50">
+				<!-- Relationships -->
+				{#if content.metadata?.relationships && content.metadata.relationships.length > 0}
+					<div class="mb-3">
+						<h5 class="text-xs font-medium text-gray-700 mb-1">Relaterade koncept</h5>
+						<div class="flex flex-wrap gap-1">
+							{#each content.metadata.relationships as relationship (relationship)}
+								<span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">{relationship}</span>
+							{/each}
 						</div>
-					{/if}
+					</div>
+				{/if}
+				
+				<!-- References -->
+				{#if content.metadata?.references && content.metadata.references.length > 0}
+					<div class="mb-3">
+						<h5 class="text-xs font-medium text-gray-700 mb-1">Relaterade principer</h5>
+						<div class="flex flex-wrap gap-1">
+							{#each content.metadata.references as reference (reference)}
+								<span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">{reference}</span>
+							{/each}
+						</div>
+					</div>
+				{/if}
+				
+				<!-- Footer link -->
+				{#if content.footerContent && content.footerHref}
 					<a 
-						href={`/vagledning#principle-${content.data.metadata.id}`} 
+						href={content.footerHref} 
 						class="inline-flex items-center text-xs text-[#0D3B4F] hover:underline"
 					>
-						Se i fullständig vägledning
+						{content.footerContent}
 						<ChevronRight class="w-3 h-3 ml-1" />
 					</a>
-				</div>
-			{:else if isConceptContent(content)}
-				<div class="space-y-2">
-					{#if content.data.metadata.relationships.length > 0}
-						<div>
-							<h5 class="text-xs font-medium text-gray-700 mb-1">Relaterade koncept</h5>
-							<div class="flex flex-wrap gap-1">
-								{#each content.data.metadata.relationships as relationship (relationship)}
-									<span class="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">{relationship}</span>
-								{/each}
-							</div>
-						</div>
-					{/if}
-					<a 
-						href="/heram" 
-						class="inline-flex items-center text-xs text-[#0D3B4F] hover:underline"
-					>
-						Utforska i HERAM
-						<ChevronRight class="w-3 h-3 ml-1" />
-					</a>
-				</div>
-			{:else}
-				<a 
-					href="/vagledning" 
-					class="inline-flex items-center text-xs text-[#0D3B4F] hover:underline"
-				>
-					Tillbaka till vägledning
-					<ChevronRight class="w-3 h-3 ml-1" />
-				</a>
-			{/if}
-		</footer>
+				{:else if content.footerContent}
+					<div class="text-xs text-gray-600">
+						{content.footerContent}
+					</div>
+				{/if}
+			</footer>
+		{/if}
 	{:else}
 		<!-- Empty state -->
 		<div class="flex-1 flex items-center justify-center p-8">
@@ -238,3 +230,147 @@
 		</div>
 	{/if}
 </aside>
+
+
+<style>
+	/* Custom styling for sidebar content */
+	:global(.sidebar-content) {
+		font-size: 0.875rem; /* text-sm */
+		line-height: 1.5;
+		color: #374151; /* text-gray-700 */
+	}
+
+	/* Header styling with better hierarchy */
+	:global(.sidebar-content h1) {
+		font-size: 1.125rem; /* text-lg */
+		font-weight: 700; /* font-bold */
+		color: #0D3B4F; /* Brand color */
+		margin: 0 0 1rem 0;
+		padding-bottom: 0.5rem;
+		border-bottom: 2px solid #E5E7EB; /* border-gray-200 */
+	}
+
+	:global(.sidebar-content h2) {
+		font-size: 1rem; /* text-base */
+		font-weight: 600; /* font-semibold */
+		color: #1F2937; /* text-gray-800 */
+		margin: 1.5rem 0 0.75rem 0;
+		padding-left: 0.5rem;
+		background-color: #F9FAFB; /* bg-gray-50 */
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.25rem;
+	}
+
+	:global(.sidebar-content h3) {
+		font-size: 0.9375rem; /* slightly smaller */
+		font-weight: 600; /* font-semibold */
+		color: #374151; /* text-gray-700 */
+		margin: 1.25rem 0 0.5rem 0;
+		padding-left: 0.75rem;
+	}
+
+	:global(.sidebar-content h4) {
+		font-size: 0.875rem; /* text-sm */
+		font-weight: 600; /* font-semibold */
+		color: #4B5563; /* text-gray-600 */
+		margin: 1rem 0 0.5rem 0;
+	}
+
+	/* Paragraph styling */
+	:global(.sidebar-content p) {
+		margin: 0 0 0.75rem 0;
+		line-height: 1.6;
+	}
+
+	/* List styling */
+	:global(.sidebar-content ul) {
+		margin: 0.5rem 0 1rem 0;
+		padding-left: 1rem;
+	}
+
+	:global(.sidebar-content li) {
+		margin: 0.25rem 0;
+		line-height: 1.5;
+	}
+
+	:global(.sidebar-content ul li) {
+		position: relative;
+		list-style: none;
+	}
+
+	:global(.sidebar-content ul li::before) {
+		content: "•";
+		color: #0D3B4F;
+		font-weight: bold;
+		position: absolute;
+		left: -0.75rem;
+	}
+
+	/* Strong text styling */
+	:global(.sidebar-content strong) {
+		font-weight: 600;
+		color: #1F2937; /* text-gray-800 */
+	}
+
+	/* Link styling */
+	:global(.sidebar-content a) {
+		color: #0D3B4F;
+		text-decoration: none;
+		font-weight: 500;
+		border-bottom: 1px dotted #0D3B4F;
+	}
+
+	:global(.sidebar-content a:hover) {
+		text-decoration: none;
+		border-bottom: 1px solid #0D3B4F;
+		background-color: rgba(13, 59, 79, 0.05);
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+		margin: -0.125rem -0.25rem;
+	}
+
+	/* Code styling if any */
+	:global(.sidebar-content code) {
+		background-color: #F3F4F6; /* bg-gray-100 */
+		color: #1F2937; /* text-gray-800 */
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+		font-size: 0.8125rem;
+		font-family: 'Courier New', monospace;
+	}
+
+	/* Special styling for definition sections */
+	:global(.sidebar-content blockquote) {
+		border-left: 4px solid #D1D5DB; /* border-gray-300 */
+		padding-left: 1rem;
+		margin: 1rem 0;
+		font-style: italic;
+		color: #6B7280; /* text-gray-500 */
+	}
+
+	/* Ensure proper spacing between sections */
+	:global(.sidebar-content > *:first-child) {
+		margin-top: 0;
+	}
+
+	:global(.sidebar-content > *:last-child) {
+		margin-bottom: 0;
+	}
+
+	/* Special styling for concept categories */
+	:global(.sidebar-content h2 + h3) {
+		margin-top: 1rem;
+	}
+
+	/* Nested list styling */
+	:global(.sidebar-content ul ul) {
+		margin-top: 0.25rem;
+		margin-bottom: 0.25rem;
+		padding-left: 0.75rem;
+	}
+
+	:global(.sidebar-content ul ul li::before) {
+		content: "◦";
+		color: #6B7280; /* text-gray-500 */
+	}
+</style>

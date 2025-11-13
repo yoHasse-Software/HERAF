@@ -1,5 +1,4 @@
 // Import the pre-generated content data
-import { marked } from 'marked';
 import { contentData } from './content-data.generated';
 
 export interface PrincipleMetadata {
@@ -11,7 +10,7 @@ export interface PrincipleMetadata {
 }
 
 export interface Principle {
-	metadata: PrincipleMetadata;
+	metadata: Record<string, any>;
 	content: string;
 	htmlContent: string;
 	slug: string;
@@ -28,14 +27,14 @@ export interface ConceptMetadata {
 }
 
 export interface Concept {
-	metadata: ConceptMetadata;
+	metadata: Record<string, any>;
 	content: string;
 	htmlContent: string;
 	slug: string;
 }
 
 // Type-safe helpers to convert from generated data
-function convertPrincipleMetadata(metadata: any): PrincipleMetadata {
+function convertPrincipleMetadata(metadata: any): Record<string, any> {
 	return {
 		id: metadata.id,
 		principle: metadata.principle,
@@ -45,15 +44,16 @@ function convertPrincipleMetadata(metadata: any): PrincipleMetadata {
 	};
 }
 
-function convertConceptMetadata(metadata: any): ConceptMetadata {
+function convertConceptMetadata(metadata: any): Record<string, any> {
 	return {
 		id: metadata.id,
 		title: metadata.title,
+		header: metadata.title,
 		icon: metadata.icon || '',
 		category: metadata.category || '',
 		relationships: Array.isArray(metadata.relationships) ? [...metadata.relationships] : [],
 		examples: Array.isArray(metadata.examples) ? [...metadata.examples] : [],
-		date: metadata.date || new Date().toISOString().split('T')[0]
+		date: metadata.date || new Date().toISOString().split('T')[0],
 	};
 }
 
@@ -121,7 +121,7 @@ export function searchContent(
 	
 	const filteredPrinciples = principles.filter(principle => 
 		principle.metadata.principle.toLowerCase().includes(lowerQuery) ||
-		principle.metadata.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+		principle.metadata.tags.some((tag: string) => tag.toLowerCase().includes(lowerQuery)) ||
 		principle.content.toLowerCase().includes(lowerQuery)
 	);
 	
@@ -139,7 +139,7 @@ export function searchContent(
 // Function to get principles by tags
 export function getPrinciplesByTag(principles: Principle[], tag: string): Principle[] {
 	return principles.filter(principle => 
-		principle.metadata.tags.some(t => t.toLowerCase() === tag.toLowerCase())
+		principle.metadata.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase())
 	);
 }
 
@@ -152,6 +152,6 @@ export function getRelatedPrinciples(
 	
 	return allPrinciples
 		.filter(p => p.metadata.id !== currentPrinciple.metadata.id)
-		.filter(p => p.metadata.tags.some(tag => currentTags.includes(tag)))
+		.filter(p => p.metadata.tags.some((tag: string) => currentTags.includes(tag)))
 		.slice(0, 3); // Return max 3 related principles
 }

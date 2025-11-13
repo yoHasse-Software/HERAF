@@ -1,16 +1,17 @@
 import { getContext, setContext } from 'svelte';
 import type { Principle, Concept } from '$lib/content';
+import type { Snippet } from 'svelte';
 
-// Define content types that can be displayed in sidebar
-export type SidebarContentType = 'principle' | 'concept' | 'custom';
-
+// Generic sidebar content interface
 export interface SidebarContent {
-	type: SidebarContentType;
 	title: string;
 	content: string;
 	htmlContent?: string;
-	metadata?: any;
-	data?: Principle | Concept | any;
+	categoryLabel?: string;
+	categoryColor?: string;
+	metadata?: Record<string, any>;
+	footerContent?: string;
+	footerHref?: string;
 }
 
 // Create a sidebar state class using Svelte 5 runes
@@ -21,9 +22,8 @@ class SidebarState {
 	
 	// Derived states
 	hasContent = $derived(this.content !== null);
-	contentType = $derived(this.content?.type || null);
 	
-	// Actions
+	// Generic open method - this is the main API
 	open(content: SidebarContent) {
 		this.content = content;
 		this.isOpen = true;
@@ -47,37 +47,66 @@ class SidebarState {
 		}
 	}
 	
-	// Convenience methods for different content types
+	// Convenience methods for backward compatibility
 	openPrinciple(principle: Principle) {
 		this.open({
-			type: 'principle',
-			title: principle.metadata.principle,
+			title: principle.metadata.id,
 			content: principle.content,
 			htmlContent: principle.htmlContent,
-			metadata: principle.metadata,
-			data: principle
+			categoryLabel: 'Arkitekturprincip',
+			categoryColor: 'blue',
+			metadata: {
+				header: principle.metadata.principle,
+				status: principle.metadata.status,
+				tags: principle.metadata.tags,
+				references: principle.metadata.references,
+				type: 'principle'
+			},
+			footerContent: 'Se i fullständig vägledning',
+			footerHref: `/vagledning#principle-${principle.metadata.id}`
 		});
 	}
 	
 	openConcept(concept: Concept) {
 		this.open({
-			type: 'concept',
 			title: concept.metadata.title,
 			content: concept.content,
 			htmlContent: concept.htmlContent,
-			metadata: concept.metadata,
-			data: concept
+			categoryLabel: 'Koncept',
+			categoryColor: 'green',
+			metadata: {
+				header: concept.metadata.title,
+				category: concept.metadata.category,
+				examples: concept.metadata.examples,
+				relationships: concept.metadata.relationships,
+				type: 'concept'
+			},
+			footerContent: 'Utforska i HERAM',
+			footerHref: '/heram'
 		});
 	}
 	
-	openCustomContent(title: string, htmlContent: string, metadata?: any) {
+	// Generic method for custom content (e.g., terms, definitions)
+	openGeneric(options: {
+		title: string;
+		htmlContent?: string;
+		content?: string;
+		categoryLabel?: string;
+		categoryColor?: string;
+		metadata?: Record<string, any>;
+		footerContent?: string;
+		footerHref?: string;
+	}) {
+		console.log('openGeneric called with options:', options);
 		this.open({
-			type: 'custom',
-			title,
-			content: '',
-			htmlContent,
-			metadata,
-			data: { title, htmlContent, metadata }
+			title: options.title,
+			content: options.content || '',
+			htmlContent: options.htmlContent,
+			categoryLabel: options.categoryLabel,
+			categoryColor: options.categoryColor || 'gray',
+			metadata: options.metadata,
+			footerContent: options.footerContent,
+			footerHref: options.footerHref
 		});
 	}
 	
@@ -104,15 +133,6 @@ export function getSidebarContext(): SidebarState {
 		throw new Error('Sidebar context not found. Make sure createSidebarContext() is called in a parent component.');
 	}
 	return context as SidebarState;
-}
-
-// Type guard functions
-export function isPrincipleContent(content: SidebarContent | null): content is SidebarContent & { data: Principle } {
-	return content?.type === 'principle';
-}
-
-export function isConceptContent(content: SidebarContent | null): content is SidebarContent & { data: Concept } {
-	return content?.type === 'concept';
 }
 
 // Helper function to get content summary for preview

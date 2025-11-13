@@ -201,7 +201,7 @@
 					>
 						<IconComponent class="w-8 h-8 mx-auto mb-2 text-[#0D3B4F]" />
 						<h4 class="text-sm font-semibold text-gray-900">{concept.metadata.title}</h4>
-						<p class="text-xs text-gray-600 mt-1">{concept.content.substring(0, 40)}...</p>
+						<!-- <p class="text-xs text-gray-600 mt-1">{@html concept.htmlContent.substring(0, 40)}...</p> -->
 					</button>
 				{/each}
 			</div>
