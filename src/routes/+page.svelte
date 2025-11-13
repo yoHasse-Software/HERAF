@@ -1,4 +1,4 @@
-<<script lang="ts">
+<script lang="ts">
 	import { BookOpen, Brain, GitBranch, ArrowRight } from '@lucide/svelte';
 </script>
 

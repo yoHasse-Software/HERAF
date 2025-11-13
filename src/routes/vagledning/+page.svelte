@@ -89,6 +89,8 @@
 					<h3 class="font-semibold text-gray-900 mb-4">Navigation</h3>
 					<nav class="space-y-2">
 						{#each navigationSections as section}
+						{@const IconComponent = section.icon}
+
 							<button
 								onclick={() => scrollToSection(section.id)}
 								class="w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors duration-200
@@ -96,7 +98,7 @@
 										? 'bg-[#352F44] text-white' 
 										: 'text-gray-700 hover:bg-gray-100'}"
 							>
-								<svelte:component this={section.icon} class="w-4 h-4 mr-3" />
+								<IconComponent class="w-4 h-4 mr-3" />
 								<span class="text-sm">{section.title}</span>
 							</button>
 						{/each}
@@ -317,6 +319,14 @@
 
 <style>
 	:global(.clickable-term) {
-		@apply underline decoration-dotted text-[#352F44] cursor-pointer hover:bg-[#352F44]/10 px-1 rounded;
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		color: #352F44;
+		cursor: pointer;
+		padding: 0 0.25rem;
+		border-radius: 0.25rem;
+	}
+	:global(.clickable-term:hover) {
+		background-color: rgba(53,47,68,0.1);
 	}
 </style>
