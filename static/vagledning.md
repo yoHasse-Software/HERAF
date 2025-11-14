@@ -1,7 +1,7 @@
 # HERAF - Vägledning
 *Higher Education Reference Architecture Framework*
 
-![HERAF Vägledning](/img/heraf_vagledning_logo.png)
+![HERAF Vägledning](img/heraf_vagledning_logo.png)
 
 **Version 0.5-Alfa**  
 **2025-11-12**
@@ -94,7 +94,7 @@ För praktiskt arbete rekommenderas att följa kapitlet Skapa referensarkitektur
 ---
 
 ## HERAF
-![HERAF - Vägledning & HERAM](/img/heraf_vagledning_o_heram.png)
+![HERAF - Vägledning & HERAM](img/heraf_vagledning_o_heram.png)
 
 Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och [HERAM].
 
@@ -105,13 +105,17 @@ Båda områden fyller olika syften där vägledningen är det material som vägl
 - **[HERAM]** = Teoretisk modell för _vad_ en referensarkitektur ska innehålla
 ```
 
-![Konceptuell modell över underliggande komponenter och deras relationer.](/img/heraf_konceptuell_modell.png)
+![Konceptuell modell över underliggande komponenter och deras relationer.](img/heraf_konceptuell_modell.png)
 
 ### Vägledningen
+
+![Vagledningen innehåll](img/vagledningen_content.png){width=400px}
 
 Vägledningen – nuvarande dokument – är själva beskrivningen av HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket.
 
 ### HERAM
+
+![HERAM innehåll](img/heram_content.png){width=400px}
 
 Higher Education Reference Architecture Model ([HERAM]) är en modell som består av en konceptkarta, konceptbeskrivning samt ett styrande dokument för ramverket HERAF.
 
@@ -152,7 +156,11 @@ Processen är framtagen för att kvalitetssäkra arbetet med referensarkitekture
 
 Processen bör inte ses som ett flöde där ena aktiviteten måste genomföras före den andra, den ska hjälpa i hur man startar och kommer igång. Det rekommenderas att genomföra processen i mindre omfång och iterationer snarare än att försöka få med samtliga målgrupper och intressenter under skapandet.
 
-Kommande avsnitt beskriver de aktiviteter som ingår i processen "Skapa referensarkitektur". Aktiviteterna är indelade i två kategorier:
+Kommande avsnitt beskriver de aktiviteter som ingår i processen "Skapa referensarkitektur". 
+
+![Översiktsbild av aktiviteter som ingår i skapandet av en referensarkitektur.](img/processmodel_full.png)
+
+Aktiviteterna är indelade i två kategorier:
 
 - **Kontinuerliga aktiviteter** som pågår under framtagningen.
 - **Skapande aktiviteter** som stegvis leder till att referensarkitekturen utformas och dokumenteras.

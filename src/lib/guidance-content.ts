@@ -211,14 +211,41 @@ function processInteractiveContent(content: string): string {
     
     // Process image captions and enhance image display
     processedContent = processedContent.replace(/!\[([^\]]*)\]\(([^)]+)\)(\{([^}]+)\})?/g, (match, alt, src, _, attributes) => {
-        const figureClass = attributes ? ` class="${attributes}"` : '';
+        let figureClass = '';
+        let imageStyle = '';
+        let imageClass = 'guidance-image';
         
-        // Special handling for logo images - make them smaller
-        const isLogo = src.includes('logo') || alt.toLowerCase().includes('logo') || alt.toLowerCase().includes('vägledning');
-        const imageClass = isLogo ? 'guidance-image logo-image' : 'guidance-image';
+        // Parse attributes if provided
+        if (attributes) {
+            const attrPairs = attributes.split(/\s+/);
+            attrPairs.forEach((attr: string) => {
+                if (attr.includes('=')) {
+                    const [key, value] = attr.split('=');
+                    const cleanValue = value.replace(/['"]/g, '');
+                    
+                    if (key === 'width') {
+                        imageStyle += `max-width: ${cleanValue}; `;
+                    } else if (key === 'height') {
+                        imageStyle += `max-height: ${cleanValue}; `;
+                    } else if (key === 'class') {
+                        imageClass += ` ${cleanValue}`;
+                    }
+                } else {
+                    // Treat as class name
+                    imageClass += ` ${attr}`;
+                }
+            });
+        }
         
-        return `<figure class="image-figure"${figureClass}>
-            <img src="${src}" alt="${alt}" class="${imageClass}" loading="lazy" />
+        // Special handling for logo images (if no explicit size given)
+        if (!imageStyle && (src.includes('logo') || alt.toLowerCase().includes('logo') || alt.toLowerCase().includes('vägledning'))) {
+            imageClass += ' logo-image';
+        }
+        
+        const styleAttr = imageStyle ? ` style="${imageStyle.trim()}"` : '';
+        
+        return `<figure class="image-figure">
+            <img src="${src}" alt="${alt}" class="${imageClass}"${styleAttr} loading="lazy" />
             ${alt ? `<figcaption class="image-caption">${alt}</figcaption>` : ''}
         </figure>`;
     });

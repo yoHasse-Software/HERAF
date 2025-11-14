@@ -206,8 +206,8 @@
 </script>
 
 
-<div class="min-h-screen bg-gray-50">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="min-h-screen bg-gray-50 overflow-x-hidden">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-w-0">
 		<!-- Page Header -->
 		 {#await guidanceContent}
 			<!-- Navigation -->
@@ -241,7 +241,7 @@
 			</div>
 		</div>
 		
-		<div class="grid lg:grid-cols-5 gap-8">
+		<div class="grid lg:grid-cols-5 gap-8 min-w-0">
 			<!-- Sidebar Navigation -->
 			<div class="lg:col-span-1">
 				<div class="bg-white rounded-xl shadow-sm p-4 sticky top-8">
@@ -331,8 +331,8 @@
 			</div>
 			
 			<!-- Main Content Area -->
-			<div class="lg:col-span-4">
-				<div class="bg-white rounded-xl shadow-sm p-8">
+			<div class="lg:col-span-4 min-w-0">
+				<div class="bg-white rounded-xl shadow-sm p-8 overflow-hidden min-w-0">
 					{#if isLoading}
 						<!-- Loading State -->
 						<div class="flex items-center justify-center py-12">
@@ -358,7 +358,7 @@
 						</div>
 					{:else if gContent}
 						<!-- Guidance Content -->
-						<div class="prose max-w-none guidance-content">
+						<div class="prose max-w-none guidance-content min-w-0">
 							{@html gContent.fullContent}
 						</div>
 					{:else}
@@ -392,7 +392,9 @@
 	:global(.guidance-content) {
 		color: rgb(55, 65, 81);
 		line-height: 1.625;
-		
+		min-width: 0;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
 	}
 	
 	:global(.guidance-content h1) {
@@ -445,6 +447,8 @@
 		margin-bottom: 1rem;
 		color: rgb(55, 65, 81);
 		line-height: 1.625;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
 	}
 	
 	:global(.guidance-content ul, .guidance-content ol) {
@@ -491,6 +495,7 @@
 		border-radius: 0.5rem;
 		margin: 1.5rem 0;
 		overflow-x: auto;
+		max-width: 100%;
 	}
 	
 	:global(.guidance-content pre code) {
@@ -710,6 +715,9 @@
 		max-width: 100%;
 		height: auto;
 		border-radius: 0.5rem;
+		margin: 0 auto;
+		display: block;
+		object-fit: contain;
 	}
 	
 	/* Logo images - make them smaller */
@@ -787,6 +795,31 @@
 		
 		:global(.guidance-content) {
 			font-size: 0.875rem;
+		}
+		
+		/* Ensure images fit on mobile screens */
+		:global(.guidance-content .guidance-image) {
+			max-width: calc(100vw - 4rem);
+			min-width: 100%;
+			width: 100%;
+		}
+		
+		:global(.guidance-content .logo-image) {
+			max-width: min(300px, calc(100vw - 4rem));
+			max-height: 200px;
+		}
+		
+		:global(.guidance-content .image-figure) {
+			margin: 1rem 0;
+		}
+		
+		/* Better table handling on mobile */
+		:global(.guidance-content table) {
+			font-size: 0.875rem;
+		}
+		
+		:global(.guidance-content th, .guidance-content td) {
+			padding: 0.75rem;
 		}
 	}
 </style>
