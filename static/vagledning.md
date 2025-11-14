@@ -1,6 +1,8 @@
 # HERAF - Vägledning
 *Higher Education Reference Architecture Framework*
 
+![HERAF Vägledning](/img/heraf_vagledning_logo.png)
+
 **Version 0.5-Alfa**  
 **2025-11-12**
 
@@ -29,7 +31,6 @@
       - [Konkretisering](#konkretisering)
 4. [Exempel och mallar](#exempel-och-mallar)
 5. [Begreppsreferenser](#begreppsreferenser)
-6. [Bilagor](#bilagor)
 
 ---
 
@@ -51,9 +52,9 @@ Vägledningens syfte är att kort beskriva de centrala områden i HERAF (Higher 
 
 En referensarkitektur är en mall eller ramverk som beskriver en rekommenderad struktur och organisering inom ett specifikt område. Den fungerar som en överenskommen vägledning och standardiseringsgrund för hur lösningar inom ett visst område bör implementeras.
 
-:::tip Viktigt att veta
+```note Viktigt att veta
 En referensarkitektur ska alltid utgå från tydligt definierade målgrupper och deras specifika behov för att bli relevant och användbar.
-:::
+```
 
 En väldefinierad referensarkitektur innehåller flera centrala komponenter:
 - **Målgrupp** och deras specifika behov och utmaningar
@@ -62,13 +63,9 @@ En väldefinierad referensarkitektur innehåller flera centrala komponenter:
 - **Vyer** som visualiserar olika aspekter av arkitekturen
 - **Riktlinjer** för implementation och användning
 
-```example
+```example Exempel på referensarkitektur
 Ett exempel på en referensarkitektur inom högskolan kan vara "Identitets- och åtkomsthantering för lärosäten" som definierar hur studenter och personal ska kunna logga in och få tillgång till olika system på ett säkert och effektivt sätt.
 ```
-
-:::info Koppling till HERAF
-HERAF tillhandahåller en strukturerad metod för att skapa sådana referensarkitekturer på ett konsekvent sätt.
-:::
 
 HERAF definiera en referensarkitektur enligt följande:
 
@@ -97,10 +94,18 @@ För praktiskt arbete rekommenderas att följa kapitlet Skapa referensarkitektur
 ---
 
 ## HERAF
+![HERAF - Vägledning & HERAM](/img/heraf_vagledning_o_heram.png)
 
-Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och HERAM.
+Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och [HERAM].
 
-Båda områden fyller olika syften där vägledningen är det material som vägleder och hjälper användningen av ramverket samt skapandet av en referensarkitektur. HERAM utgör den teoretiska och strukturella grunden för hur referensarkitekturer i ramverket ska struktureras och beskrivas.
+Båda områden fyller olika syften där vägledningen är det material som vägleder och hjälper användningen av ramverket samt skapandet av en referensarkitektur. [HERAM] utgör den teoretiska och strukturella grunden för hur referensarkitekturer i ramverket ska struktureras och beskrivas.
+
+```note Förhållande mellan vägledning och HERAM
+- **Vägledningen** = Praktisk guide för _hur_ man skapar referensarkitekturer
+- **[HERAM]** = Teoretisk modell för _vad_ en referensarkitektur ska innehålla
+```
+
+![Konceptuell modell över underliggande komponenter och deras relationer.](/img/heraf_konceptuell_modell.png)
 
 ### Vägledningen
 
@@ -108,9 +113,36 @@ Vägledningen – nuvarande dokument – är själva beskrivningen av HERAF och 
 
 ### HERAM
 
-Higher Education Reference Architecture Model (HERAM) är en modell som består av en konceptkarta, konceptbeskrivning samt ett styrande dokument för ramverket HERAF.
+Higher Education Reference Architecture Model ([HERAM]) är en modell som består av en konceptkarta, konceptbeskrivning samt ett styrande dokument för ramverket HERAF.
+
+
+HERAM består av följande huvuddelar:
+- **Konceptkarta** - Visuell representation av alla centrala begrepp
+- **Konceptbeskrivning** - Detaljerade definitioner och förklaringar  
+- **Styrande dokument** - Gemensamma principer, riktlinjer och regler
+
 
 Konceptbeskrivningen och konceptkartan förklarar de olika begreppen i ramverket samt visar hur dessa förhåller sig till varandra. Det styrande dokumentet innehåller gemensamma principer, riktlinjer och regler som säkerställer enhetliga referensarkitekturer.
+
+
+HERAM fungerar som den teoretiska grunden för HERAF. När du skapar en referensarkitektur använder du HERAM-modellen för att säkerställa att alla nödvändiga aspekter täcks in och att strukturen följer ramverkets standarder.
+
+
+
+HERAM-modellen säkerställer att alla referensarkitekturer inom HERAF:
+- Följer samma grundläggande struktur och terminologi
+- Adresserar samma typer av angelägenheter och aspekter
+- Kan jämföras och kombineras på ett meningsfullt sätt
+- Uppfyller kvalitetskrav för användbarhet och ändamålsenlighet
+
+Modellen är resultatet av omfattande analys av befintliga arkitekturramverk och anpassning till högskolesektorns specifika behov.
+
+
+```note Nästa steg
+
+För att utforska HERAM-modellen i detalj, besök [[HERAM-sektionen]](/heram) där du kan interagera med konceptkartan och utforska alla begrepp.
+
+```
 
 ---
 
@@ -200,13 +232,6 @@ Resultatet är en referensarkitektur för ett specifikt område.
 | Begrepp | Definition | Referenser |
 |---------|------------|------------|
 | **Referensarkitektur** | En referensarkitektur är en mall eller ramverk som beskriver en rekommenderad struktur och organisering inom ett specifikt område. Den fungerar som en överenskommen vägledning och standardiseringsgrund för hur en lösning inom ett visst område bör implementeras. | DoD Reference Architecture White Paper<br><br>Reference architecture - Wikipedia<br><br>Referensarkitektur för Identitet och åtkomst |
-
----
-
-## Bilagor
-
-- **[B01]** HERAM Begreppsmodell – Konceptbeskrivning
-- **[B02]** HERAM Referensarkitektur – Styrning
 
 ---
 

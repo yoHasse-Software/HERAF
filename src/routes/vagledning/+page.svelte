@@ -5,7 +5,7 @@
     import { getConcept, type Concept } from '$lib/content';
 	import { loadGuidanceContent, getNavigationSections, type GuidanceContent } from '$lib/guidance-content';
 	
-	let guidanceContent = $state<GuidanceContent | null>(null);
+	let guidanceContent = $state<Promise<GuidanceContent | null>>();
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	
@@ -16,23 +16,6 @@
 	let showTOC = $state(false);
 	let showBackToTop = $state(false);
 	
-	// Generate navigation sections from the guidance content
-	const navigationSections = $derived(() => {
-		if (!guidanceContent) return [];
-		return getNavigationSections(guidanceContent.sections);
-	});
-	
-	// Get the actual navigation sections value
-	const navSections = $derived(navigationSections());
-	
-	function scrollToSection(sectionId: string) {
-		currentSection = sectionId;
-		const element = document.getElementById(sectionId);
-		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		}
-		showTOC = false; // Close mobile TOC
-	}
 	
 	function scrollToTop() {
 		window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,20 +31,43 @@
 	// Handle scroll events for current section tracking and back-to-top button
 	function handleScroll() {
 		const scrollTop = window.scrollY;
-		
 		// Show back-to-top button when scrolled down
 		showBackToTop = scrollTop > 500;
 		
-		// Update current section based on scroll position
+	}
+
+	// Dynamically determine which section should be highlighted based on actual scroll position
+	function updateCurrentSection() {
 		const sections = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
-		let current = '';
+		if (sections.length === 0) return;
+
+		// Get the actual scroll margin from CSS
+		const firstSection = sections[0] as HTMLElement;
+		const scrollMargin = parseInt(getComputedStyle(firstSection).scrollMarginTop) || 0;
 		
+		let current = '';
+		let closestSection: string = "";
+		let closestDistance = Infinity;
+
 		sections.forEach((section) => {
 			const rect = section.getBoundingClientRect();
-			if (rect.top <= 120) {
-				current = section.id;
+			// Calculate distance from the "active zone" (top of viewport + scroll margin)
+			const activeZone = scrollMargin;
+			const distanceFromActiveZone = Math.abs(rect.top - activeZone);
+			
+			// Section is visible and closest to the active zone
+			if (rect.bottom > 0 && rect.top < window.innerHeight) {
+				if (distanceFromActiveZone < closestDistance) {
+					closestDistance = distanceFromActiveZone;
+					closestSection = section.id;
+				}
 			}
 		});
+
+		// If we found a closest section, use it
+		if (closestSection) {
+			current = closestSection;
+		}
 		
 		if (current !== currentSection) {
 			currentSection = current;
@@ -77,20 +83,26 @@
 			intersectionObserver.disconnect();
 		}
 
-		// Set up new intersection observer for section tracking
+		// Get the actual scroll margin dynamically
+		const headings = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
+		if (headings.length === 0) return;
+
+		const firstHeading = headings[0] as HTMLElement;
+		const scrollMargin = parseInt(getComputedStyle(firstHeading).scrollMarginTop) || 0;
+
+		// Set up intersection observer with dynamic root margin based on actual CSS
 		intersectionObserver = new IntersectionObserver(
 			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting && entry.target.id) {
-						currentSection = entry.target.id;
-					}
-				});
+				// Use the same logic as handleScroll for consistency
+				updateCurrentSection();
 			},
-			{ threshold: 0.1, rootMargin: '-100px 0px -50% 0px' }
+			{ 
+				threshold: [0, 0.1, 0.5, 1], 
+				rootMargin: `-${scrollMargin + 20}px 0px -50% 0px` // Dynamic margin based on actual CSS
+			}
 		);
 
-		// Observe all section headings in the loaded content
-		const headings = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
+		// Observe all section headings
 		headings.forEach((heading) => {
 			intersectionObserver?.observe(heading);
 		});
@@ -133,12 +145,7 @@
 		const sectionRefs = document.querySelectorAll('.guidance-content .section-ref');
 		sectionRefs.forEach(link => {
 			link.addEventListener('click', (e) => {
-				e.preventDefault();
-				const href = (e.target as HTMLAnchorElement).getAttribute('href');
-				if (href?.startsWith('#')) {
-					const targetId = href.substring(1);
-					scrollToSection(targetId);
-				}
+				showTOC = false; // Close mobile TOC
 			});
 		});
 		
@@ -158,42 +165,67 @@
 	}
 	
 	onMount(() => {
-		// Load guidance content
-		loadGuidanceContent()
-			.then(content => {
-				guidanceContent = content;
-				isLoading = false;
-				// Setup section tracking and concept links after content loads
-				setTimeout(() => {
+		let cancelled = false;
+
+		
+		try {
+			guidanceContent = loadGuidanceContent();
+			if (cancelled) return; 
+
+			isLoading = false;
+			
+			// Wait for content to be loaded and rendered
+			setTimeout(() => {
+				if (!cancelled) {
 					setupSectionTracking();
 					setupConceptLinkHandlers();
-				}, 100);
-			})
-			.catch(err => {
-				error = err.message;
-				isLoading = false;
-			});
-			
-		// Add scroll listener
-		window.addEventListener('scroll', handleScroll);
+					// Initial section update
+					updateCurrentSection();
+				}
+			}, 100);
+		} catch (err: any) {
+			if (cancelled) return;
+			error = err.message;
+			isLoading = false;
+		}
 		
+
+		// sync setup
+		window.addEventListener('scroll', handleScroll);
+
+		// cleanup (must be returned from here)
 		return () => {
+			cancelled = true;
 			window.removeEventListener('scroll', handleScroll);
 			if (intersectionObserver) {
 				intersectionObserver.disconnect();
 			}
 		};
 	});
+
 </script>
+
 
 <div class="min-h-screen bg-gray-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 		<!-- Page Header -->
+		 {#await guidanceContent}
+			<!-- Navigation -->
+			<div class="space-y-2">
+				<div class="h-8 bg-gray-200 rounded animate-pulse"></div>
+				<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
+				<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+				<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
+				<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+			</div>
+		{:then gContent}
+		{@const navSections = getNavigationSections(gContent?.sections || [])}
+		{@const allSections = navSections.flatMap(section => [section, ...(section.children || []), ...(section.children ? section.children.flatMap(child => child.children || []) : [])])}
 		<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
 			<h1 class="text-3xl font-bold text-[#352F44] mb-2">
-				{guidanceContent?.title || 'HERAF - Vägledning'}
+				{gContent?.title || 'HERAF - Vägledning'}
 			</h1>
-			<p class="text-gray-600">Det levande dokumentet för att skapa referensarkitekturer inom högre utbildning</p>
+			<p class="text-gray-600">Det levande dokumentet för att skapa referensarkitekturer inom högre utbildning </p>
 			
 			<!-- Search Bar -->
 			<div class="mt-6 max-w-md">
@@ -212,52 +244,76 @@
 		<div class="grid lg:grid-cols-5 gap-8">
 			<!-- Sidebar Navigation -->
 			<div class="lg:col-span-1">
-				<div class="bg-white rounded-xl shadow-sm p-6 sticky top-8">
+				<div class="bg-white rounded-xl shadow-sm p-4 sticky top-8">
 					<!-- Mobile TOC Toggle -->
 					<button
 						onclick={() => showTOC = !showTOC}
 						class="lg:hidden w-full flex items-center justify-between p-3 bg-gray-100 rounded-lg mb-4"
 					>
-						<span class="font-semibold text-gray-900">Innehållsförteckning</span>
+						<span class="font-semibold text-gray-900">Innehållsförteckning </span>
 						<Menu class="w-4 h-4" />
 					</button>
-					
-					<!-- Navigation -->
+
 					<div class="lg:block" class:hidden={!showTOC}>
 						<h3 class="font-semibold text-gray-900 mb-4">Innehållsförteckning</h3>
-						{#if isLoading}
-							<!-- Loading State -->
-							<div class="space-y-2">
-								<div class="h-8 bg-gray-200 rounded animate-pulse"></div>
-								<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
-								<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
-								<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
-								<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
-							</div>
-						{:else if error}
+
+						{#if error}
 							<!-- Error State -->
 							<div class="text-center py-4">
 								<p class="text-sm text-gray-500">Kunde inte ladda navigering</p>
 							</div>
-						{:else if navSections.length === 0}
+						{/if}
+						
+						{#if navSections.length === 0}
 							<!-- Empty State -->
 							<div class="text-center py-4">
 								<p class="text-sm text-gray-500">Ingen navigering tillgänglig</p>
 							</div>
 						{:else}
 							<!-- Loaded Navigation -->
-							<nav class="space-y-1 max-h-96 overflow-y-auto">
+							<nav class="space-y-1 max-h-96 overflow-y-auto overflow-x-hidden pr-1">
 								{#each navSections as section}
-									<button
-										onclick={() => scrollToSection(section.id)}
-										class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm
+									<a
+										href="#{section.id}"
+										class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm block
 											{currentSection === section.id 
 												? 'bg-[#352F44] text-white' 
 												: 'text-gray-700 hover:bg-gray-100'}
-											{section.level === 2 ? 'font-medium' : 'ml-3 text-xs'}"
+											{section.level === 1 ? 'font-semibold' : section.level === 2 ? 'font-medium' : 'font-normal'}"
 									>
 										{section.title}
-									</button>
+									</a>
+									
+									<!-- Render children if they exist -->
+									{#if section.children && section.children.length > 0}
+										{#each section.children as child}
+											<a
+												href="#{child.id}"
+												class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm ml-4 block
+													{currentSection === child.id 
+														? 'bg-[#352F44] text-white' 
+														: 'text-gray-600 hover:bg-gray-100'}
+													{child.level === 3 ? 'text-xs' : 'text-sm'}"
+											>
+												{child.title}
+											</a>
+											
+											<!-- Render grandchildren if they exist -->
+											{#if child.children && child.children.length > 0}
+												{#each child.children as grandchild}
+													<a
+														href="#{grandchild.id}"
+														class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-xs ml-8 block
+															{currentSection === grandchild.id 
+																? 'bg-[#352F44] text-white' 
+																: 'text-gray-500 hover:bg-gray-100'}"
+													>
+														{grandchild.title}
+													</a>
+												{/each}
+											{/if}
+										{/each}
+									{/if}
 								{/each}
 							</nav>
 						{/if}
@@ -267,10 +323,11 @@
 					<div class="mt-6 pt-6 border-t">
 						<div class="text-sm text-gray-600 mb-2">Du läser:</div>
 						<div class="text-xs font-medium text-[#352F44]">
-							{navSections.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
+							{allSections.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
 						</div>
 					</div>
 				</div>
+
 			</div>
 			
 			<!-- Main Content Area -->
@@ -299,10 +356,10 @@
 								Försök igen
 							</button>
 						</div>
-					{:else if guidanceContent}
+					{:else if gContent}
 						<!-- Guidance Content -->
 						<div class="prose max-w-none guidance-content">
-							{@html guidanceContent.fullContent}
+							{@html gContent.fullContent}
 						</div>
 					{:else}
 						<!-- Fallback -->
@@ -313,7 +370,10 @@
 					{/if}
 				</div>
 			</div>
+
 		</div>
+		{/await}
+
 	</div>
 	
 	<!-- Back to Top Button -->
@@ -332,6 +392,7 @@
 	:global(.guidance-content) {
 		color: rgb(55, 65, 81);
 		line-height: 1.625;
+		
 	}
 	
 	:global(.guidance-content h1) {
@@ -341,6 +402,7 @@
 		margin-bottom: 1.5rem;
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid rgb(229, 231, 235);
+		scroll-margin-top: 120px;
 	}
 	
 	:global(.guidance-content h2) {
@@ -496,17 +558,18 @@
 	:global(.guidance-content a[href^="concept:"]) {
 		color: #0D3B4F;
 		text-decoration: underline;
+		text-decoration-style: dotted;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		border-bottom: 2px solid transparent;
 	}
 	
 	:global(.guidance-content a[href^="concept:"]:hover) {
 		color: #456882;
-		border-bottom-color: #456882;
-		background-color: rgba(13, 59, 79, 0.1);
-		padding: 0 2px;
-		border-radius: 2px;
+		text-decoration-style: solid;
+		background-color: rgba(13, 59, 79, 0.05);
+		padding: 0 1px;
 	}
 	
 	/* Section references */
@@ -647,8 +710,14 @@
 		max-width: 100%;
 		height: auto;
 		border-radius: 0.5rem;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-		border: 1px solid rgb(229, 231, 235);
+	}
+	
+	/* Logo images - make them smaller */
+	:global(.guidance-content .logo-image) {
+		max-width: 600px;
+		max-height: 550px;
+		object-fit: contain;
+		margin: 0 auto;
 	}
 	
 	:global(.guidance-content .image-caption) {

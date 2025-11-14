@@ -22,6 +22,26 @@ marked.setOptions({
     breaks: true,
 });
 
+// Configure marked to generate proper heading IDs that match our parsing
+const renderer = new marked.Renderer();
+renderer.heading = function({ tokens, depth }: { tokens: any[], depth: number }): string {
+    // Extract text from tokens
+    const text = this.parser.parseInline(tokens);
+    
+    // Generate the same ID as our parseMarkdownToSections function
+    const id = text.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+    
+    return `<h${depth} id="${id}">${text}</h${depth}>`;
+};
+
+marked.setOptions({
+    renderer: renderer
+});
+
 /**
  * Parse markdown content and create structured sections
  */
@@ -30,10 +50,11 @@ async function parseMarkdownToSections(content: string): Promise<GuidanceSection
     const lines = content.split('\n');
     let currentSection: GuidanceSection | null = null;
     let currentContent: string[] = [];
+    
 
     for (const line of lines) {
-        const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
-        
+        const trimmedLine = line.trim();
+        const headerMatch = trimmedLine.match(/^(#{1,6})\s*(.+)/);
         if (headerMatch) {
             // Save previous section if exists
             if (currentSection) {
@@ -49,6 +70,7 @@ async function parseMarkdownToSections(content: string): Promise<GuidanceSection
                 .replace(/\s+/g, '-')
                 .replace(/-+/g, '-')
                 .trim();
+
 
             currentSection = {
                 id,
@@ -133,12 +155,12 @@ function generateTOC(sections: GuidanceSection[]): GuidanceSection[] {
 function processInteractiveContent(content: string): string {
     const concepts = getConceptsArray();
     let processedContent = content;
-    
+
     // Create a map of concept titles to their slugs for easy lookup
     const conceptMap = new Map<string, string>();
     concepts.forEach(concept => {
         const title = concept.metadata.title?.toLowerCase();
-        if (title) {
+        if (title && title !== 'heram') {
             conceptMap.set(title, concept.slug);
             // Also add plural forms
             if (!title.endsWith('er') && !title.endsWith('ar')) {
@@ -148,10 +170,35 @@ function processInteractiveContent(content: string): string {
         }
     });
     
-    // Process concept terms - but avoid links that are already in markdown link format
+    // Process concept terms - but avoid links that are already in markdown link format or inside headers
+    // Simple approach: avoid replacing text inside existing markdown links and headers
     conceptMap.forEach((slug, conceptTerm) => {
-        const regex = new RegExp(`\\b(${conceptTerm})\\b(?![^[]*\\]\\([^)]*\\))`, 'gi');
-        processedContent = processedContent.replace(regex, (match) => {
+        // Only replace if not already inside a markdown link or header
+        const regex = new RegExp(`\\b(${conceptTerm})\\b(?![^\\[]*\\]\\([^\\)]*\\))`, 'gi');
+        processedContent = processedContent.replace(regex, (match, ...args) => {
+            // Check if we're inside a link by looking at the full string context
+            const offset = args[args.length - 2]; // offset is second to last argument
+            const fullString = args[args.length - 1]; // full string is last argument
+            
+            // Get the line containing this match to check if it's a header
+            const beforeMatch = fullString.substring(0, offset);
+            const lines = beforeMatch.split('\n');
+            const currentLineStart = beforeMatch.lastIndexOf('\n') + 1;
+            const currentLineEnd = fullString.indexOf('\n', offset);
+            const currentLine = fullString.substring(currentLineStart, currentLineEnd === -1 ? fullString.length : currentLineEnd);
+            
+            // Check if current line is a header (starts with #)
+            if (currentLine.trim().match(/^#{1,6}\s/)) {
+                return match; // Don't link if inside a header
+            }
+            
+            // Simple check: are we inside square brackets?
+            const openBrackets = (beforeMatch.match(/\[/g) || []).length;
+            const closeBrackets = (beforeMatch.match(/\]/g) || []).length;
+            
+            // If we have more open brackets than close brackets, we're probably inside a link
+            if (openBrackets > closeBrackets) return match;
+            
             const concept = concepts.find(c => c.slug === slug);
             if (concept) {
                 return `[${match}](concept:${slug} "${concept.metadata.title}")`;
@@ -160,35 +207,18 @@ function processInteractiveContent(content: string): string {
         });
     });
     
-    // Process custom callout boxes
-    processedContent = processedContent.replace(/:::(\w+)\s*(.*?)\s*:::/gs, (match, type, content) => {
-        const icon = getCalloutIcon(type);
-        const className = getCalloutClass(type);
-        return `<div class="callout callout-${type} ${className}" data-callout="${type}">
-            <div class="callout-header">
-                <span class="callout-icon">${icon}</span>
-                <span class="callout-title">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
-            </div>
-            <div class="callout-content">${content.trim()}</div>
-        </div>`;
-    });
-    
-    // Process example blocks
-    processedContent = processedContent.replace(/```example\s*(.*?)\s*```/gs, (match, content) => {
-        return `<div class="example-block">
-            <div class="example-header">
-                <span class="example-icon">💡</span>
-                <span class="example-title">Exempel</span>
-            </div>
-            <div class="example-content">${content.trim()}</div>
-        </div>`;
-    });
+
     
     // Process image captions and enhance image display
     processedContent = processedContent.replace(/!\[([^\]]*)\]\(([^)]+)\)(\{([^}]+)\})?/g, (match, alt, src, _, attributes) => {
         const figureClass = attributes ? ` class="${attributes}"` : '';
+        
+        // Special handling for logo images - make them smaller
+        const isLogo = src.includes('logo') || alt.toLowerCase().includes('logo') || alt.toLowerCase().includes('vägledning');
+        const imageClass = isLogo ? 'guidance-image logo-image' : 'guidance-image';
+        
         return `<figure class="image-figure"${figureClass}>
-            <img src="${src}" alt="${alt}" class="guidance-image" loading="lazy" />
+            <img src="${src}" alt="${alt}" class="${imageClass}" loading="lazy" />
             ${alt ? `<figcaption class="image-caption">${alt}</figcaption>` : ''}
         </figure>`;
     });
@@ -221,24 +251,49 @@ function processInteractiveContent(content: string): string {
         return `<a href="principle:${principleRef.toLowerCase()}" class="principle-ref" title="Visa princip: ${principleRef}">${principleRef}</a>`;
     });
     
+    // Process HERAM references - treat as concept for sidebar
+    processedContent = processedContent.replace(/\[HERAM\]/g, (match) => {
+        return `[${match.replace(/[\[\]]/g, '')}](concept:heram "Utforska HERAM-modellen")`;
+    });
+
+        // Process custom callout boxes (only for specific callout types, not programming languages)
+    const calloutTypes = ['note', 'tip', 'warning', 'danger', 'info', 'important', 'example'];
+    processedContent = processedContent.replace(/```(\w+)\s*(.*?)\n([\s\S]*?)```/gs, (match, type, titleLine, content) => {
+        // Only process if it's a recognized callout type, otherwise leave it as a regular code block
+        if (!calloutTypes.includes(type.toLowerCase())) {
+            return match; // Return unchanged for programming languages like java, mermaid, etc.
+        }
+        
+        // Use the title line if provided, otherwise fallback to type name
+        const title = titleLine.trim() || type.charAt(0).toUpperCase() + type.slice(1);
+
+        return `<div class="callout callout-${type} bg-gray-50 border-gray-200 text-gray-800" data-callout="${type}">
+            <div class="callout-header">
+                <span class="callout-icon">📝</span>
+                <span class="callout-title">${marked.parseInline(title)}</span>
+            </div>
+            <div class="callout-content">${marked.parse(content?.trim() || '')}</div>
+        </div>`;
+    });
+    
     return processedContent;
 }
 
 /**
  * Get callout icon based on type
  */
-function getCalloutIcon(type: string): string {
-    const icons: Record<string, string> = {
-        tip: '💡',
-        warning: '⚠️',
-        danger: '🚨',
-        info: 'ℹ️',
-        note: '📝',
-        important: '❗',
-        example: '💡'
-    };
-    return icons[type] || 'ℹ️';
-}
+// function getCalloutIcon(type: string): string {
+//     const icons: Record<string, string> = {
+//         tip: '💡',
+//         warning: '⚠️',
+//         danger: '🚨',
+//         info: 'ℹ️',
+//         note: '📝',
+//         important: '❗',
+//         example: '💡'
+//     };
+//     return icons[type] || 'ℹ️';
+// }
 
 /**
  * Get callout CSS class based on type
@@ -266,17 +321,18 @@ export async function loadGuidanceContent(): Promise<GuidanceContent> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const rawContent = await response.text();
+                // Parse sections from the processed content (so IDs match)
+        const sections = await parseMarkdownToSections(rawContent);
         
         // Process content to add interactive features
         const processedContent = processInteractiveContent(rawContent);
+        
+
         
         // Extract title from first heading
         const titleMatch = processedContent.match(/^#\s+(.+)$/m);
         const title = titleMatch ? titleMatch[1] : 'HERAF Vägledning';
 
-        // Parse sections
-        const sections = await parseMarkdownToSections(processedContent);
-        
         // Generate TOC
         const toc = generateTOC(sections);
         
