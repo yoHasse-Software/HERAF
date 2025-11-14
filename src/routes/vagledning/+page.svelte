@@ -3,13 +3,11 @@
 	import { onMount } from 'svelte';
 	import { getSidebarContext } from '$lib/sidebar-state.svelte';
     import { getConcept, type Concept } from '$lib/content';
-	import type { PageData } from './$types';
+	import { loadGuidanceContent, getNavigationSections, type GuidanceContent } from '$lib/guidance-content';
 	
-	interface Props {
-		data: PageData;
-	}
-	
-	let { data }: Props = $props();
+	let guidanceContent = $state<GuidanceContent | null>(null);
+	let isLoading = $state(true);
+	let error = $state<string | null>(null);
 	
 	const sidebar = getSidebarContext();
 	
@@ -20,14 +18,12 @@
 	
 	// Generate navigation sections from the guidance content
 	const navigationSections = $derived(() => {
-		return data.guidance.toc
-			.filter(section => section.level <= 2) // Only main sections
-			.map(section => ({
-				id: section.id,
-				title: section.title,
-				level: section.level
-			}));
+		if (!guidanceContent) return [];
+		return getNavigationSections(guidanceContent.sections);
 	});
+	
+	// Get the actual navigation sections value
+	const navSections = $derived(navigationSections());
 	
 	function scrollToSection(sectionId: string) {
 		currentSection = sectionId;
@@ -57,46 +53,135 @@
 		showBackToTop = scrollTop > 500;
 		
 		// Update current section based on scroll position
-		const sections = document.querySelectorAll('h2, h3');
+		const sections = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
 		let current = '';
 		
 		sections.forEach((section) => {
 			const rect = section.getBoundingClientRect();
-			if (rect.top <= 100) {
-				const id = section.id || section.textContent?.toLowerCase()
-					.replace(/[^a-z0-9\s-]/g, '')
-					.replace(/\s+/g, '-') || '';
-				current = id;
+			if (rect.top <= 120) {
+				current = section.id;
 			}
 		});
 		
-		currentSection = current;
+		if (current !== currentSection) {
+			currentSection = current;
+		}
 	}
-	
-	onMount(() => {
-		// Add scroll listener
-		window.addEventListener('scroll', handleScroll);
-		
-		// Set up intersection observer for section tracking
-		const observer = new IntersectionObserver(
+
+	let intersectionObserver: IntersectionObserver | null = null;
+
+	// Setup intersection observer for content after it loads
+	function setupSectionTracking() {
+		// Clean up existing observer
+		if (intersectionObserver) {
+			intersectionObserver.disconnect();
+		}
+
+		// Set up new intersection observer for section tracking
+		intersectionObserver = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
+					if (entry.isIntersecting && entry.target.id) {
 						currentSection = entry.target.id;
 					}
 				});
 			},
 			{ threshold: 0.1, rootMargin: '-100px 0px -50% 0px' }
 		);
-		
-		// Observe all section headings
-		document.querySelectorAll('h2[id], h3[id]').forEach((heading) => {
-			observer.observe(heading);
+
+		// Observe all section headings in the loaded content
+		const headings = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
+		headings.forEach((heading) => {
+			intersectionObserver?.observe(heading);
 		});
+	}
+
+	// Setup concept link handlers for interactive content
+	function setupConceptLinkHandlers() {
+		// Add click handlers for concept links
+		const conceptLinks = document.querySelectorAll('.guidance-content a[href^="concept:"]');
+		conceptLinks.forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const href = (e.target as HTMLAnchorElement).getAttribute('href');
+				if (href?.startsWith('concept:')) {
+					const conceptSlug = href.replace('concept:', '');
+					openTermInSidebar(conceptSlug);
+				}
+			});
+		});
+		
+		// Setup expandable section handlers
+		const expandButtons = document.querySelectorAll('.guidance-content .expand-toggle');
+		expandButtons.forEach(button => {
+			button.addEventListener('click', (e) => {
+				const button = e.currentTarget as HTMLButtonElement;
+				const content = button.nextElementSibling as HTMLElement;
+				const section = button.parentElement as HTMLElement;
+				
+				if (content.style.display === 'none' || !content.style.display) {
+					content.style.display = 'block';
+					section.classList.add('expanded');
+				} else {
+					content.style.display = 'none';
+					section.classList.remove('expanded');
+				}
+			});
+		});
+		
+		// Setup section reference handlers
+		const sectionRefs = document.querySelectorAll('.guidance-content .section-ref');
+		sectionRefs.forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const href = (e.target as HTMLAnchorElement).getAttribute('href');
+				if (href?.startsWith('#')) {
+					const targetId = href.substring(1);
+					scrollToSection(targetId);
+				}
+			});
+		});
+		
+		// Setup principle reference handlers
+		const principleRefs = document.querySelectorAll('.guidance-content a[href^="principle:"]');
+		principleRefs.forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const href = (e.target as HTMLAnchorElement).getAttribute('href');
+				if (href?.startsWith('principle:')) {
+					const principleSlug = href.replace('principle:', '');
+					// You could extend this to open principles in sidebar
+					console.log('Open principle:', principleSlug);
+				}
+			});
+		});
+	}
+	
+	onMount(() => {
+		// Load guidance content
+		loadGuidanceContent()
+			.then(content => {
+				guidanceContent = content;
+				isLoading = false;
+				// Setup section tracking and concept links after content loads
+				setTimeout(() => {
+					setupSectionTracking();
+					setupConceptLinkHandlers();
+				}, 100);
+			})
+			.catch(err => {
+				error = err.message;
+				isLoading = false;
+			});
+			
+		// Add scroll listener
+		window.addEventListener('scroll', handleScroll);
 		
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
-			observer.disconnect();
+			if (intersectionObserver) {
+				intersectionObserver.disconnect();
+			}
 		};
 	});
 </script>
@@ -105,7 +190,9 @@
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 		<!-- Page Header -->
 		<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-			<h1 class="text-3xl font-bold text-[#352F44] mb-2">{data.guidance.title}</h1>
+			<h1 class="text-3xl font-bold text-[#352F44] mb-2">
+				{guidanceContent?.title || 'HERAF - Vägledning'}
+			</h1>
 			<p class="text-gray-600">Det levande dokumentet för att skapa referensarkitekturer inom högre utbildning</p>
 			
 			<!-- Search Bar -->
@@ -138,27 +225,49 @@
 					<!-- Navigation -->
 					<div class="lg:block" class:hidden={!showTOC}>
 						<h3 class="font-semibold text-gray-900 mb-4">Innehållsförteckning</h3>
-						<nav class="space-y-1 max-h-96 overflow-y-auto">
-							{#each navigationSections as section}
-								<button
-									onclick={() => scrollToSection(section.id)}
-									class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm
-										{currentSection === section.id 
-											? 'bg-[#352F44] text-white' 
-											: 'text-gray-700 hover:bg-gray-100'}
-										{section.level === 2 ? 'font-medium' : 'ml-3 text-xs'}"
-								>
-									{section.title}
-								</button>
-							{/each}
-						</nav>
+						{#if isLoading}
+							<!-- Loading State -->
+							<div class="space-y-2">
+								<div class="h-8 bg-gray-200 rounded animate-pulse"></div>
+								<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
+								<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+								<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
+								<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+							</div>
+						{:else if error}
+							<!-- Error State -->
+							<div class="text-center py-4">
+								<p class="text-sm text-gray-500">Kunde inte ladda navigering</p>
+							</div>
+						{:else if navSections.length === 0}
+							<!-- Empty State -->
+							<div class="text-center py-4">
+								<p class="text-sm text-gray-500">Ingen navigering tillgänglig</p>
+							</div>
+						{:else}
+							<!-- Loaded Navigation -->
+							<nav class="space-y-1 max-h-96 overflow-y-auto">
+								{#each navSections as section}
+									<button
+										onclick={() => scrollToSection(section.id)}
+										class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm
+											{currentSection === section.id 
+												? 'bg-[#352F44] text-white' 
+												: 'text-gray-700 hover:bg-gray-100'}
+											{section.level === 2 ? 'font-medium' : 'ml-3 text-xs'}"
+									>
+										{section.title}
+									</button>
+								{/each}
+							</nav>
+						{/if}
 					</div>
 					
 					<!-- Progress Indicator -->
 					<div class="mt-6 pt-6 border-t">
 						<div class="text-sm text-gray-600 mb-2">Du läser:</div>
 						<div class="text-xs font-medium text-[#352F44]">
-							{navigationSections.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
+							{navSections.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
 						</div>
 					</div>
 				</div>
@@ -167,10 +276,41 @@
 			<!-- Main Content Area -->
 			<div class="lg:col-span-4">
 				<div class="bg-white rounded-xl shadow-sm p-8">
-					<!-- Guidance Content -->
-					<div class="prose max-w-none guidance-content">
-						{@html data.guidance.fullContent}
-					</div>
+					{#if isLoading}
+						<!-- Loading State -->
+						<div class="flex items-center justify-center py-12">
+							<div class="text-center">
+								<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#352F44] mx-auto mb-4"></div>
+								<p class="text-gray-600">Laddar vägledning...</p>
+							</div>
+						</div>
+					{:else if error}
+						<!-- Error State -->
+						<div class="text-center py-12">
+							<div class="text-red-500 mb-4">
+								<BookOpen class="w-12 h-12 mx-auto mb-2" />
+								<p class="text-lg font-semibold">Kunde inte ladda vägledningen</p>
+							</div>
+							<p class="text-gray-600 mb-4">{error}</p>
+							<button 
+								onclick={() => window.location.reload()}
+								class="bg-[#352F44] text-white px-4 py-2 rounded-lg hover:bg-[#5C5470] transition-colors"
+							>
+								Försök igen
+							</button>
+						</div>
+					{:else if guidanceContent}
+						<!-- Guidance Content -->
+						<div class="prose max-w-none guidance-content">
+							{@html guidanceContent.fullContent}
+						</div>
+					{:else}
+						<!-- Fallback -->
+						<div class="text-center py-12">
+							<BookOpen class="w-12 h-12 mx-auto mb-4 text-gray-400" />
+							<p class="text-gray-600">Inget innehåll att visa</p>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -190,121 +330,394 @@
 
 <style>
 	:global(.guidance-content) {
-		@apply text-gray-700 leading-relaxed;
+		color: rgb(55, 65, 81);
+		line-height: 1.625;
 	}
 	
 	:global(.guidance-content h1) {
-		@apply text-3xl font-bold text-[#352F44] mb-6 pb-3 border-b border-gray-200;
+		font-size: 1.875rem;
+		font-weight: 700;
+		color: #352F44;
+		margin-bottom: 1.5rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid rgb(229, 231, 235);
 	}
 	
 	:global(.guidance-content h2) {
-		@apply text-2xl font-bold text-[#352F44] mb-6 mt-12 pb-2 border-b border-gray-200;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #352F44;
+		margin-bottom: 1.5rem;
+		margin-top: 3rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid rgb(229, 231, 235);
 		scroll-margin-top: 120px;
 	}
 	
 	:global(.guidance-content h3) {
-		@apply text-xl font-semibold text-[#0D3B4F] mb-4 mt-8;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #0D3B4F;
+		margin-bottom: 1rem;
+		margin-top: 2rem;
 		scroll-margin-top: 120px;
 	}
 	
 	:global(.guidance-content h4) {
-		@apply text-lg font-semibold text-gray-900 mb-3 mt-6;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: rgb(17, 24, 39);
+		margin-bottom: 0.75rem;
+		margin-top: 1.5rem;
 	}
 	
 	:global(.guidance-content h5) {
-		@apply text-base font-semibold text-gray-800 mb-2 mt-4;
+		font-size: 1rem;
+		font-weight: 600;
+		color: rgb(55, 65, 81);
+		margin-bottom: 0.5rem;
+		margin-top: 1rem;
 	}
 	
 	:global(.guidance-content p) {
-		@apply mb-4 text-gray-700 leading-relaxed;
+		margin-bottom: 1rem;
+		color: rgb(55, 65, 81);
+		line-height: 1.625;
 	}
 	
 	:global(.guidance-content ul, .guidance-content ol) {
-		@apply mb-4 space-y-2;
+		margin-bottom: 1rem;
+		line-height: 1.5;
 	}
 	
 	:global(.guidance-content li) {
-		@apply text-gray-700 leading-relaxed;
+		color: rgb(55, 65, 81);
+		line-height: 1.625;
 	}
 	
 	:global(.guidance-content ul > li) {
-		@apply ml-6 list-disc;
+		margin-left: 1.5rem;
+		list-style-type: disc;
 	}
 	
 	:global(.guidance-content ol > li) {
-		@apply ml-6 list-decimal;
+		margin-left: 1.5rem;
+		list-style-type: decimal;
 	}
 	
 	:global(.guidance-content blockquote) {
-		@apply bg-blue-50 border-l-4 border-blue-500 p-4 rounded my-6;
+		background-color: rgb(239, 246, 255);
+		border-left: 4px solid rgb(59, 130, 246);
+		padding: 1rem;
+		border-radius: 0.375rem;
+		margin: 1.5rem 0;
 	}
 	
 	:global(.guidance-content code) {
-		@apply bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm font-mono;
+		background-color: rgb(243, 244, 246);
+		color: rgb(55, 65, 81);
+		padding: 0.125rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+		font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 	}
 	
 	:global(.guidance-content pre) {
-		@apply bg-gray-900 text-gray-100 p-4 rounded-lg my-6 overflow-x-auto;
+		background-color: rgb(17, 24, 39);
+		color: rgb(243, 244, 246);
+		padding: 1rem;
+		border-radius: 0.5rem;
+		margin: 1.5rem 0;
+		overflow-x: auto;
 	}
 	
 	:global(.guidance-content pre code) {
-		@apply bg-transparent text-gray-100 p-0;
+		background-color: transparent;
+		color: rgb(243, 244, 246);
+		padding: 0;
 	}
 	
 	:global(.guidance-content table) {
-		@apply w-full border-collapse border border-gray-300 my-6;
+		width: 100%;
+		border-collapse: collapse;
+		border: 1px solid rgb(209, 213, 219);
+		margin: 1.5rem 0;
 	}
 	
 	:global(.guidance-content th) {
-		@apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold;
+		background-color: rgb(243, 244, 246);
+		border: 1px solid rgb(209, 213, 219);
+		padding: 1rem;
+		text-align: left;
+		font-weight: 600;
 	}
 	
 	:global(.guidance-content td) {
-		@apply border border-gray-300 px-4 py-2;
+		border: 1px solid rgb(209, 213, 219);
+		padding: 1rem;
 	}
 	
 	:global(.guidance-content a) {
-		@apply text-[#0D3B4F] underline hover:text-[#456882] transition-colors;
+		color: #0D3B4F;
+		text-decoration: underline;
+		transition: color 0.2s ease;
+	}
+	
+	:global(.guidance-content a:hover) {
+		color: #456882;
 	}
 	
 	:global(.guidance-content strong) {
-		@apply font-semibold text-gray-900;
+		font-weight: 600;
+		color: rgb(17, 24, 39);
 	}
 	
 	:global(.guidance-content em) {
-		@apply italic;
+		font-style: italic;
 	}
 	
 	/* Special styling for callout boxes */
 	:global(.guidance-content blockquote strong:first-child) {
-		@apply text-blue-900 block mb-1;
+		color: rgb(30, 58, 138);
+		display: block;
+		margin-bottom: 0.25rem;
 	}
 	
 	/* Section spacing */
 	:global(.guidance-content > *:first-child) {
-		@apply mt-0;
+		margin-top: 0;
 	}
 	
 	:global(.guidance-content hr) {
-		@apply border-gray-300 my-8;
+		border-color: rgb(209, 213, 219);
+		margin: 2rem 0;
+	}
+	
+	:global(.guidance-content a[href^="concept:"]) {
+		color: #0D3B4F;
+		text-decoration: underline;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-bottom: 2px solid transparent;
+	}
+	
+	:global(.guidance-content a[href^="concept:"]:hover) {
+		color: #456882;
+		border-bottom-color: #456882;
+		background-color: rgba(13, 59, 79, 0.1);
+		padding: 0 2px;
+		border-radius: 2px;
+	}
+	
+	/* Section references */
+	:global(.guidance-content .section-ref) {
+		color: #352F44;
+		text-decoration: none;
+		background-color: rgba(53, 47, 68, 0.1);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-size: 0.9em;
+		border: 1px solid rgba(53, 47, 68, 0.2);
+		transition: all 0.2s ease;
+	}
+	
+	:global(.guidance-content .section-ref:hover) {
+		background-color: rgba(53, 47, 68, 0.2);
+		border-color: rgba(53, 47, 68, 0.4);
+	}
+	
+	/* Principle references */
+	:global(.guidance-content .principle-ref) {
+		color: #5C5470;
+		text-decoration: none;
+		background-color: rgba(92, 84, 112, 0.1);
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-size: 0.9em;
+		border: 1px solid rgba(92, 84, 112, 0.2);
+		transition: all 0.2s ease;
+		font-weight: 500;
+	}
+	
+	:global(.guidance-content .principle-ref:hover) {
+		background-color: rgba(92, 84, 112, 0.2);
+		border-color: rgba(92, 84, 112, 0.4);
+	}
+	
+	/* Callout boxes */
+	:global(.guidance-content .callout) {
+		margin: 1.5rem 0;
+		border: 1px solid;
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+	
+	:global(.guidance-content .callout-header) {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 1rem;
+		font-weight: 600;
+		border-bottom: 1px solid inherit;
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+	
+	:global(.guidance-content .callout-content) {
+		padding: 1rem;
+		line-height: 1.6;
+	}
+	
+	:global(.guidance-content .callout-icon) {
+		font-size: 1.2rem;
+	}
+	
+	:global(.guidance-content .callout-tip) {
+		background-color: rgb(240, 253, 244);
+		border-color: rgb(187, 247, 208);
+		color: rgb(21, 128, 61);
+	}
+	
+	:global(.guidance-content .callout-warning) {
+		background-color: rgb(254, 252, 232);
+		border-color: rgb(253, 224, 71);
+		color: rgb(146, 64, 14);
+	}
+	
+	:global(.guidance-content .callout-danger) {
+		background-color: rgb(254, 242, 242);
+		border-color: rgb(252, 165, 165);
+		color: rgb(153, 27, 27);
+	}
+	
+	:global(.guidance-content .callout-info) {
+		background-color: rgb(239, 246, 255);
+		border-color: rgb(147, 197, 253);
+		color: rgb(29, 78, 216);
+	}
+	
+	:global(.guidance-content .callout-note) {
+		background-color: rgb(249, 250, 251);
+		border-color: rgb(209, 213, 219);
+		color: rgb(55, 65, 81);
+	}
+	
+	:global(.guidance-content .callout-important) {
+		background-color: rgb(250, 245, 255);
+		border-color: rgb(196, 181, 253);
+		color: rgb(109, 40, 217);
+	}
+	
+	/* Example blocks */
+	:global(.guidance-content .example-block) {
+		margin: 1.5rem 0;
+		border: 1px solid rgb(187, 247, 208);
+		border-radius: 0.5rem;
+		background-color: rgb(240, 253, 244);
+		overflow: hidden;
+	}
+	
+	:global(.guidance-content .example-header) {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 1rem;
+		font-weight: 600;
+		color: rgb(21, 128, 61);
+		border-bottom: 1px solid rgb(187, 247, 208);
+		background-color: rgba(21, 128, 61, 0.1);
+	}
+	
+	:global(.guidance-content .example-content) {
+		padding: 1rem;
+		color: rgb(21, 128, 61);
+		line-height: 1.6;
+	}
+	
+	:global(.guidance-content .example-icon) {
+		font-size: 1.2rem;
+	}
+	
+	/* Image styling */
+	:global(.guidance-content .image-figure) {
+		margin: 2rem 0;
+		text-align: center;
+	}
+	
+	:global(.guidance-content .guidance-image) {
+		max-width: 100%;
+		height: auto;
+		border-radius: 0.5rem;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		border: 1px solid rgb(229, 231, 235);
+	}
+	
+	:global(.guidance-content .image-caption) {
+		margin-top: 0.5rem;
+		font-size: 0.875rem;
+		color: rgb(107, 114, 128);
+		font-style: italic;
+	}
+	
+	/* Expandable sections */
+	:global(.guidance-content .expandable-section) {
+		margin: 1.5rem 0;
+		border: 1px solid rgb(229, 231, 235);
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+	
+	:global(.guidance-content .expand-toggle) {
+		width: 100%;
+		padding: 1rem;
+		background-color: rgb(249, 250, 251);
+		border: none;
+		text-align: left;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		transition: background-color 0.2s ease;
+		font-weight: 500;
+		color: rgb(55, 65, 81);
+	}
+	
+	:global(.guidance-content .expand-toggle:hover) {
+		background-color: rgb(243, 244, 246);
+	}
+	
+	:global(.guidance-content .expand-icon) {
+		transition: transform 0.2s ease;
+		font-size: 0.875rem;
+		color: rgb(107, 114, 128);
+	}
+	
+	:global(.guidance-content .expandable-section.expanded .expand-icon) {
+		transform: rotate(90deg);
+	}
+	
+	:global(.guidance-content .expand-content) {
+		padding: 1rem;
+		border-top: 1px solid rgb(229, 231, 235);
+		background-color: white;
+		line-height: 1.6;
 	}
 	
 	/* Mobile responsiveness */
 	@media (max-width: 768px) {
 		:global(.guidance-content h1) {
-			@apply text-2xl;
+			font-size: 1.5rem;
 		}
 		
 		:global(.guidance-content h2) {
-			@apply text-xl;
+			font-size: 1.25rem;
 		}
 		
 		:global(.guidance-content h3) {
-			@apply text-lg;
+			font-size: 1.125rem;
 		}
 		
 		:global(.guidance-content) {
-			@apply text-sm;
+			font-size: 0.875rem;
 		}
 	}
 </style>

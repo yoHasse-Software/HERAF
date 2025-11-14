@@ -1,693 +1,214 @@
-# HERAF Vägledning
-*Higher Education Reference Architecture Framework - Det levande dokumentet för att skapa referensarkitekturer*
+# HERAF - Vägledning
+*Higher Education Reference Architecture Framework*
+
+**Version 0.5-Alfa**  
+**2025-11-12**
+
+## Innehåll
+
+1. [Inledning](#inledning)
+   1. [Bakgrund](#bakgrund)
+   2. [Introduktion](#introduktion)
+      - [Syfte](#syfte)
+      - [Vad är en referensarkitektur?](#vad-är-en-referensarkitektur)
+      - [Varför behövs en referensarkitektur?](#varför-behövs-en-referensarkitektur)
+   3. [Begrepp](#begrepp)
+   4. [Läsanvisning](#läsanvisning)
+2. [HERAF](#heraf)
+   1. [Vägledningen](#vägledningen)
+   2. [HERAM](#heram)
+3. [Skapa referensarkitektur](#skapa-referensarkitektur)
+   1. [Kontinuerliga aktiviteter](#kontinuerliga-aktiviteter)
+      - [Förankra med målgrupp](#förankra-med-målgrupp)
+      - [Kommunicera med intressenter](#kommunicera-med-intressenter)
+      - [Dokumentera arkitekturbeslut](#dokumentera-arkitekturbeslut)
+   2. [Skapande aktiviteter](#skapande-aktiviteter)
+      - [Omfång](#omfång)
+      - [Identifiering](#identifiering)
+      - [Definiering](#definiering)
+      - [Konkretisering](#konkretisering)
+4. [Exempel och mallar](#exempel-och-mallar)
+5. [Begreppsreferenser](#begreppsreferenser)
+6. [Bilagor](#bilagor)
+
+---
 
 ## Inledning
 
-Välkommen till HERAF (Higher Education Reference Architecture Framework) - ett omfattande ramverk som hjälper högskolor och universitet att skapa effektiva, jämförbara och återanvändbara referensarkitekturer. Denna vägledning kombinerar den teoretiska grunden i HERAM (Higher Education Reference Architecture Model) med praktisk vägledning för att skapa arkitekturer som verkligen fungerar i praktiken.
+### Bakgrund
 
-### Varför HERAF?
+Lärosäten inom den svenska högskolesektorn står inför liknande behov och utmaningar när det gäller att utveckla och förvalta strategiska och tekniska IT-lösningar. Erfarenheter från gemensamma möten visar att det saknas en enhetlig syn på vad en referensarkitektur är, hur den bör struktureras och vilket syfte den fyller. Detta skapar hinder för samarbete och förmågan att återanvända lösningar mellan lärosäten.
 
-Inom högre utbildning möter vi unika utmaningar som skiljer sig från andra sektorer:
+För att underlätta samarbete och skapa förutsättningar för enhetliga IT-lösningar tog ATI fram HERAF, ett stöd i hur referensarkitekturer ska utformas och struktureras.
 
-- **Akademisk frihet vs. standardisering**: Balansen mellan institutionell autonomi och gemensamma standarder
-- **Forskningsbehov**: Stöd för både grundutbildning och avancerad forskning
-- **Internationell samverkan**: Krav på kompatibilitet med globala forskningsnätverk
-- **Livslångt lärande**: Flexibla system som stöder olika utbildningsformer
-- **Studentcentrering**: Fokus på studentens helhetliga läranderesa
+### Introduktion
 
-HERAF adresserar dessa utmaningar genom att erbjuda:
+#### Syfte
 
-1. **Strukturerat arbetssätt** för att skapa referensarkitekturer
-2. **HERAM-modellen** som teoretisk grund
-3. **Beprövade principer** för arkitekturella beslut
-4. **Praktiska mallar** för snabb implementation
-5. **Kontinuerlig förbättring** genom gemenskapsdriven utveckling
+Vägledningens syfte är att kort beskriva de centrala områden i HERAF (Higher Education Reference Architecture Framework) samt hur den används under skapandet av en referensarkitektur. Ramverket möjliggör att referensarkitekturer skapas på ett enhetligt och strukturerat sätt samtidigt som den lämnar utrymme för viss flexibilitet genom att undvika detaljstyrning.
 
----
+#### Vad är en referensarkitektur?
 
-## HERAM - Den teoretiska grunden
+En referensarkitektur är en mall eller ramverk som beskriver en rekommenderad struktur och organisering inom ett specifikt område. Den fungerar som en överenskommen vägledning och standardiseringsgrund för hur lösningar inom ett visst område bör implementeras.
 
-HERAM (Higher Education Reference Architecture Model) utgör den teoretiska grunden för HERAF. Modellen definierar de grundläggande byggstenar som alla referensarkitekturer inom högre utbildning bör baseras på.
+:::tip Viktigt att veta
+En referensarkitektur ska alltid utgå från tydligt definierade målgrupper och deras specifika behov för att bli relevant och användbar.
+:::
 
-### Kärnkomponenter i HERAM
+En väldefinierad referensarkitektur innehåller flera centrala komponenter:
+- **Målgrupp** och deras specifika behov och utmaningar
+- **Målarkitektur** som beskriver den önskade framtida lösningen  
+- **Styrande principer** som vägleder arkitekturbeslut
+- **Vyer** som visualiserar olika aspekter av arkitekturen
+- **Riktlinjer** för implementation och användning
 
-#### 1. Arkitekturvyer (Views)
-Olika perspektiv på samma arkitektur som adresserar specifika intressentgrupper:
+```example
+Ett exempel på en referensarkitektur inom högskolan kan vara "Identitets- och åtkomsthantering för lärosäten" som definierar hur studenter och personal ska kunna logga in och få tillgång till olika system på ett säkert och effektivt sätt.
+```
 
-**Verksamhetsvy (Business View)**
-- Fokuserar på verksamhetsprocesser och organisationsstrukturer
-- Adresserar ledning, verksamhetsansvariga och processägare
-- Beskriver värdeflöden och verksamhetsmål
+:::info Koppling till HERAF
+HERAF tillhandahåller en strukturerad metod för att skapa sådana referensarkitekturer på ett konsekvent sätt.
+:::
 
-**Informationsvy (Information View)**  
-- Centrerar kring data och informationsflöden
-- Riktar sig till dataansvariga och informationsarkitekter
-- Definierar datamodeller och informationsstyrning
+HERAF definiera en referensarkitektur enligt följande:
 
-**Applikationsvy (Application View)**
-- Fokuserar på systemlandskap och applikationsinteraktioner
-- Adresserar systemägare och applikationsarkitekter
-- Beskriver systemintegration och funktionalitet
+*"En referensarkitektur är en mall eller ramverk som beskriver en rekommenderad struktur och organisering inom ett specifikt område. Den fungerar som en överenskommen vägledning och standardiseringsgrund för hur en lösning inom ett visst område bör implementeras."*
 
-**Teknikvy (Technology View)**
-- Centrerar kring teknisk infrastruktur och plattformar
-- Riktar sig till IT-drift och tekniska arkitekter
-- Definierar hårdvara, nätverk och säkerhetslösningar
+#### Varför behövs en referensarkitektur?
 
-#### 2. Aspekter (Aspects)
-Horisontella intressen som genomsyrar alla vyer:
+En referensarkitektur ger en gemensam och beprövad grund som snabbar upp förändringsprocesser och minskar behovet av att uppfinna hjulet på nytt. Den fokuserar på det mest relevanta vid rätt tidpunkt och tydliggör vad som finns på plats och vad som återstår.
 
-**Säkerhet**
-- Identitets- och åtkomsthantering
-- Dataskydd och integritetsskydd
-- Säkerhetsövervakning och incidenthantering
+Detta ger inte bara en tydlighet av behovsbilden mot externa leverantörer utan hjälper även arkitekter när man tar beslut under designarbete.
 
-**Prestanda**
-- Skalbarhet och kapacitetsplanering
-- Prestationsoptimering
-- Resursutnyttjande
+### Begrepp
 
-**Integration**
-- Systemkopplingar och API-design
-- Datasynkronisering
-- Meddelandehantering
+| Begrepp | Beskrivning |
+|---------|-------------|
+| **Angelägenhet ("Concern")** | En angelägenhet beskriver vad en intressent eller målgrupp anser vara viktigt i ett system eller en arkitektur. Det kan vara mål, behov, krav eller frågor som påverkar hur något ska utformas eller fungera.<br><br>Exempel: säkerhet, prestanda, användbarhet, kostnadseffektivitet. |
+| **Aspekt** | En aspekt beskriver ett perspektiv eller en synvinkel som används för att analysera, beskriva eller utvärdera ett system. Den hjälper till att belysa hur olika angelägenheter hanteras i arkitekturen.<br><br>Exempel: säkerhetsaspekt, prestandaaspekt, tillgänglighetsaspekt. |
+| **Aktivitetsgruppen** | Aktivitetsgruppen är den grupp som arbetar med framtagningen av referensarkitekturen. |
 
-**Styrning**
-- Compliance och regelefterlevnad
-- Arkitekturstyrning
-- Förändringsledning
+### Läsanvisning
 
-#### 3. Concerns
-Specifika behov och krav från olika intressentgrupper:
+Vägledningen kan läsas från början till slut för en samlad förståelse, eller användas som uppslagsverk för enskilda delar.
 
-**Studentconcerns**
-- Tillgänglighet och användarvänlighet
-- Mobilitet och flexibilitet
-- Integrerad lärandeupplevelse
-
-**Lärarckoncerns**
-- Pedagogiska verktyg och stöd
-- Forskningsinfrastruktur
-- Administrativ avlastning
-
-**Administratörsconcerns**
-- Effektiv processhantering
-- Rapportering och uppföljning
-- Kostnadseffektivitet
-
-**IT-concerns**
-- Systemstabilitet och driftsäkerhet
-- Underhållbarhet
-- Säkerhet och compliance
+För praktiskt arbete rekommenderas att följa kapitlet Skapa referensarkitektur. För intressenter som önskar en förståelse av ramverket HERAF och dessa användning kan börja med de inledande avsnitten.
 
 ---
 
-## Arbetsprocessen - Fyra steg till framgång
+## HERAF
 
-HERAF-processen består av fyra huvudsteg med kontinuerliga aktiviteter som löper parallellt. Denna strukturerade approach säkerställer att alla viktiga aspekter adresseras samtidigt som flexibilitet bibehålls för organisationens unika behov.
+Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och HERAM.
 
-### Steg 1: Omfång (Scope)
+Båda områden fyller olika syften där vägledningen är det material som vägleder och hjälper användningen av ramverket samt skapandet av en referensarkitektur. HERAM utgör den teoretiska och strukturella grunden för hur referensarkitekturer i ramverket ska struktureras och beskrivas.
 
-**Syfte**: Definiera vad referensarkitekturen ska omfatta och varför den behövs.
+### Vägledningen
 
-**Aktiviteter**:
-1. **Identifiera drivkrafter**
-   - Verksamhetsbehov och strategiska mål
-   - Tekniska skulder och moderniseringsbehov
-   - Regulatoriska krav och compliance
+Vägledningen – nuvarande dokument – är själva beskrivningen av HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket.
 
-2. **Definiera omfattning**
-   - Vilka domäner som ska inkluderas
-   - Organisatoriska gränser
-   - Tidshorisonter och milstolpar
+### HERAM
 
-3. **Kartlägga intressenter**
-   - Primära målgrupper för arkitekturen
-   - Beslutfattare och påverkare
-   - Användare och operatörer
+Higher Education Reference Architecture Model (HERAM) är en modell som består av en konceptkarta, konceptbeskrivning samt ett styrande dokument för ramverket HERAF.
 
-**Resultat**:
-- Projektmandat med tydliga mål
-- Avgränsningsdokument
-- Intressentanalys
+Konceptbeskrivningen och konceptkartan förklarar de olika begreppen i ramverket samt visar hur dessa förhåller sig till varandra. Det styrande dokumentet innehåller gemensamma principer, riktlinjer och regler som säkerställer enhetliga referensarkitekturer.
 
-### Steg 2: Identifiering (Identify)
+---
 
-**Syfte**: Kartlägga nuvarande tillstånd och identifiera gap och möjligheter.
+## Skapa referensarkitektur
 
-**Aktiviteter**:
-1. **As-Is analys**
-   - Befintliga system och processer
-   - Arkitekturarv och tekniska skulder
-   - Dataflöden och integrationer
+Processen är framtagen för att kvalitetssäkra arbetet med referensarkitekturer och skapa ett enhetligt arbetssätt för svenska lärosäten. Den är vägledande snarare än tvingande och betonar de viktigaste aktiviteterna. Syftet är att underlätta framtagningen av en referensarkitektur samt att man inte missar eller glömmer vissa aktiviteter.
 
-2. **Behovsinventering**
-   - Verksamhets- och teknikbehov
-   - Framtida krav och prognoser
-   - Innovationsmöjligheter
+Processen bör inte ses som ett flöde där ena aktiviteten måste genomföras före den andra, den ska hjälpa i hur man startar och kommer igång. Det rekommenderas att genomföra processen i mindre omfång och iterationer snarare än att försöka få med samtliga målgrupper och intressenter under skapandet.
 
-3. **Gap-analys**
-   - Identifierade brister och begränsningar
-   - Prioritering av förbättringsområden
-   - Riskbedömning
+Kommande avsnitt beskriver de aktiviteter som ingår i processen "Skapa referensarkitektur". Aktiviteterna är indelade i två kategorier:
 
-**Resultat**:
-- As-Is arkitekturdokumentation
-- Behovsspecifikation
-- Prioriterad lista av förbättringsområden
-
-### Steg 3: Definiering (Define)
-
-**Syfte**: Skapa den framtida målbilden och definiera designprinciper.
-
-**Aktiviteter**:
-1. **To-Be vision**
-   - Målarkitektur inom alla HERAM-vyer
-   - Designprinciper och riktlinjer
-   - Tekniska standarder och riktlinjer
-
-2. **Komponentspecifikation**
-   - Logiska komponenter och deras ansvar
-   - Gränssnitt och beroendeförhållanden
-   - Säkerhet och kvalitetsattribut
-
-3. **Implementeringsstrategi**
-   - Migreringsplan och roadmap
-   - Riskhantering
-   - Resursplanering
-
-**Resultat**:
-- To-Be arkitekturdokumentation
-- Designprinciper och standarder
-- Implementeringsstrategi
-
-### Steg 4: Konkretisering (Realize)
-
-**Syfte**: Omsätta arkitekturen i praktiska implementationer och mallar.
-
-**Aktiviteter**:
-1. **Prototyper och proof-of-concept**
-   - Tekniska demonstratorer
-   - Pilotimplementationer
-   - Konceptvalidering
-
-2. **Mallar och riktlinjer**
-   - Implementeringsmallar
-   - Konfigurationsguider
-   - Best practices
-
-3. **Utbildning och kommunikation**
-   - Arkitekturträning för utvecklare
-   - Användarguider och dokumentation
-   - Change management
-
-**Resultat**:
-- Fungerande prototyper
-- Implementeringsmallar
-- Utbildningsmaterial
+- **Kontinuerliga aktiviteter** som pågår under framtagningen.
+- **Skapande aktiviteter** som stegvis leder till att referensarkitekturen utformas och dokumenteras.
 
 ### Kontinuerliga aktiviteter
 
-**Förankring med målgrupp**
-- Regelbundna avstämningar med intressenter
-- Validering av designbeslut
-- Feedback-loopar och iterationer
+#### Förankra med målgrupp
 
-**Kommunikation med intressenter**
-- Strukturerad kommunikationsplan
-- Progressrapporter och milstolpe-presentationer
-- Transparens kring beslut och avvägningar
+Denna aktivitet innebär att kontinuerligt – och när tillfälle ges – dela referensarkitekturen med den tilltänkta målgruppen för att få återkoppling och identifiera förbättringar.
 
-**Dokumentation av beslut**
-- Arkitekturella beslut och rationale
-- Designalternativ och avvägningar
-- Lessons learned och förbättringsmöjligheter
+Syftet är att säkerställa att referensarkitekturen är relevant, användbar och ger ett värde för dem som ska använda den.
 
----
+#### Kommunicera med intressenter
 
-## Arkitekturprinciper för högre utbildning
+Kommunikationen med intressenter sker löpande för att säkerställa att viktiga perspektiv och krav beaktas i referensarkitekturen.
 
-HERAF bygger på en uppsättning grundläggande principer som ska vägleda alla arkitekturella beslut. Dessa principer är specifikt anpassade för högre utbildningssektorns unika behov och utmaningar.
+Det kan till exempel handla om säkerhetsaspekter, styrande principer eller strategiska inriktningar som behöver integreras i arbetet.
 
-### EAP001: Studentcentrering
-**Princip**: Alla tekniska lösningar ska primärt gynna studentens lärandeupplevelse.
+#### Dokumentera arkitekturbeslut
 
-**Rationale**: 
-Studenten är den ultimata slutanvändaren av utbildningsteknologi. Genom att fokusera på studentens behov skapar vi inte bara bättre lärandemiljöer utan också mer effektiva processer för personal och administration.
+Under framtagningen fattas många beslut som påverkar referensarkitekturens utformning.
 
-**Implikationer**:
-- Användarcentrerad design i alla systeminteraktioner
-- Enhetlig användarupplevelse över olika plattformar
-- Tillgänglighet och inkludering för alla studentgrupper
-- Mobilanpassning och flexibel åtkomst
+De mest centrala och vägledande besluten bör dokumenteras tillsammans med sin motivering för att skapa förståelse och spårbarhet för både målgrupper och intressenter.
 
-**Tillämpningsområden**:
-- LMS-design och integration
-- Studentportaler och självservicesystem
-- Mobila applikationer
-- Tillgänglighetsstandarder
+### Skapande aktiviteter
 
-### EAP002: Forskningsstöd
-**Princip**: IT-infrastrukturen ska aktivt stödja och möjliggöra avancerad forskning.
+De skapande aktiviteterna är de som genererar den slutgiltiga referensarkitekturen.
 
-**Rationale**:
-Forskningsexcellens kräver robust teknisk infrastruktur som kan hantera komplexa dataanalyser, internationell samverkan och varierande tekniska krav från olika forskningsdomäner.
+#### Omfång
 
-**Implikationer**:
-- Högpresterande datorkraft och lagring
-- Flexibla forskningsplattformar
-- Säker datahantering för känslig forskning
-- Integration med externa forskningsnätverk
+Omfång handlar om att specificera ramarna vid skapandet eller en ny iteration av en referensarkitektur. Syftet är att definiera vad arbetet ska omfatta, vilken målgrupp som avses och vilka angelägenheter som ska adresseras.
 
-**Tillämpningsområden**:
-- High Performance Computing (HPC) platformar
-- Forskningsdatahantering
-- Laboratorieinformationssystem (LIMS)
-- Samarbetsplattformar för forskare
+Arbetet fokuserar på att skapa en tydlig avgränsning och en gemensam förståelse för syftet med referensarkitekturen samt vilka som är den primära målgruppen.
 
-### EAP003: Akademisk integritet
-**Princip**: Alla system ska upprätthålla och främja akademisk ärlighet och integritet.
+Omfång innehåller följande delaktiviteter:
 
-**Rationale**:
-Akademisk integritet är fundamental för högskolans trovärdighet och kvalitet. Tekniska system måste både förhindra fusk och främja en kultur av ärlighet.
+- **Identifiera område** innebär att arbetsgruppen beslutar vilket område som referensarkitekturen ska gälla för och därmed inte ta ett alltför brett omfång. Exempelvis: IAM, Integration, AI, IoT, Nätverk etc.
 
-**Implikationer**:
-- Robusta system för plagiatdetektering
-- Säker examination och bedömning
-- Spårbarhet av studentarbete
-- Transparenta bedömningsprocesser
+- **Bestäm omfång** betyder att man fastställer gränser för vad referensarkitekturen ska innehålla, vilket gör det enklare att besluta om saker ska eller inte ska finnas med.
 
-**Tillämpningsområden**:
-- Examinationssystem och digital tentamen
-- Plagiatdetekteringssystem
-- Portföljsystem för studentarbeten
-- Peer review-plattformar
+- **Identifiera vad som inte ska ingå** är de avgränsningarna man sätter inom omfånget. Exempelvis kan omfånget vara referensarkitektur för integration men att man avgränsar iterationen för det tekniska perspektivet.
 
-### EAP004: Livslångt lärande
-**Princip**: Tekniska lösningar ska stödja kontinuerligt lärande över hela livscykeln.
+#### Identifiering
 
-**Rationale**:
-Modern utbildning sträcker sig långt bortom traditionell campusutbildning. System måste stödja olika typer av lärande, från formell utbildning till professionell utveckling.
+Identifiering innebär att urskilja, kartlägga och dokumentera relevanta faktorer som behöver beaktas i arbetet. Detta inkluderar att skapa en överblick och synliggöra vad som finns, men inte att fatta beslut eller fastställa något.
 
-**Implikationer**:
-- Flexibla utbildningsformat (online, hybrid, micro-learning)
-- Portabilitet av läranderesultat
-- Integration med professionella utvecklingsplattformar
-- Stöd för olika pedagogiska metoder
+Delaktiviteterna innebär att samla in och kartlägga de faktorer som påverkar framtagandet av referensarkitekturen. Aktivitetsgruppen fokuserar på att skapa en överblick av omvärldens lösningar, strategier, styrande principer, lagar, standarder, mönster och best practices.
 
-**Tillämpningsområden**:
-- E-learningplattformar
-- Credentialing-system
-- Kompetensprofiler och digitala märken
-- Alumni-engagemangsplattformar
+samt att belysa relevanta aspekter och målgruppens perspektiv.
 
-### P001: Öppna standarder
-**Princip**: Använd öppna, internationella standarder där det är möjligt.
+Resultatet blir ett underlag som visar vilka krav, mönster och behov som ska beaktas i nästa steg.
 
-**Rationale**:
-Öppna standarder främjar interoperabilitet, minskar vendor lock-in och möjliggör innovation. För högre utbildning är detta särskilt viktigt för internationell samverkan.
+#### Definiering
 
-**Implikationer**:
-- Prioritera öppna protokoll och format
-- Undvik proprietära lösningar när alternativ finns
-- Bidra till utveckling av utbildningsstandarder
-- Säkerställ långsiktig tillgänglighet till data
+Innebär att man fastställer vad som ska ingå inom vissa ramar utan att gå ner på detaljnivå. Syftet är att skapa en helhetsbild och tydliga avgränsningar så att man kan arbeta vidare utan att fastna i detaljer.
 
-### P002: Privacy by design
-**Princip**: Integritetsskydd ska vara inbyggt från start, inte tillagt senare.
+Delen innebär att fastställa de grundläggande ramarna för hur referensarkitekturen ska utformas och användas. Aktivitetsgruppen fokuserar på att definiera vilka perspektiv som behövs, vilka principer, regler och riktlinjer som ska gälla. Arbetet innebär också att definiera behov av vyer. Resultatet är en referensarkitektur med tydligt definierade delar som kan konkretiseras.
 
-**Rationale**:
-Högskolor hanterar känsliga personuppgifter om studenter, forskare och personal. Proaktivt integritetsskydd är både en legal skyldighet och etisk grund.
+#### Konkretisering
 
-**Implikationer**:
-- Minimera datainsamling till vad som är nödvändigt
-- Transparent information om dataanvändning
-- Stark autentisering och åtkomstkontroll
-- Regelbunden granskning av datahantering
+Innebär att gå från övergripande definitioner eller idéer till att bryta ner och utveckla innehållet på en mer detaljerad nivå.
 
-### P003: Skalbar arkitektur
-**Princip**: Designa för tillväxt och förändring från början.
+Denna del syftar till att konkretisera definitionerna som finns i mer detaljerade och praktiskt användbara delar. Aktivitetsgruppen tar fram olika vyer med val av detaljnivåer, förtydligande av styrande riktlinjer, principer och regler samt skapandet av en begreppsmodell för området.
 
-**Rationale**:
-Högskolor växer och förändras över tid. Tekniska lösningar måste kunna anpassa sig till nya krav utan omfattande ombyggnation.
-
-**Implikationer**:
-- Modulär systemdesign
-- API-first approach
-- Cloud-native lösningar där lämpligt
-- Separation av concerns i arkitekturen
+Resultatet är en referensarkitektur för ett specifikt område.
 
 ---
 
-## Implementeringsguider och mallar
+## Exempel och mallar
 
-### Mall för domänanalys
-
-När du arbetar med en specifik domän (t.ex. studenthantering, forskningsstöd, eller administrativ drift), använd denna strukturerade approach:
-
-#### 1. Domänkartläggning
-```markdown
-## Domän: [Domännamn]
-
-### Verksamhetskontext
-- Huvudsyfte och mål
-- Viktiga intressenter
-- Regulatoriska krav
-
-### Nuvarande tillstånd
-- Befintliga system och processer
-- Identifierade problem och begränsningar
-- Tekniska skulder
-
-### Framtida vision  
-- Önskad målbild
-- Kritiska förbättringsområden
-- Framtida krav och behov
-```
-
-#### 2. Arkitekturspecifikation
-```markdown
-### Arkitekturvyer enligt HERAM
-
-#### Verksamhetsvy
-- Processflöden och ansvarsområden
-- Organisationsstruktur
-- Verksamhetsregler
-
-#### Informationsvy
-- Datamodeller och entiteter
-- Informationsflöden
-- Datastyrning och kvalitet
-
-#### Applikationsvy
-- Systemlandskap
-- Applikationsinteraktioner
-- Funktionalitetskartor
-
-#### Teknikvy
-- Infrastruktur och plattformar
-- Säkerhetsarkitektur
-- Drift och övervakning
-```
-
-### Mall för teknisk implementering
-
-#### API-designprinciper
-```markdown
-### RESTful API Guidelines
-
-1. **Namnkonventioner**
-   - Använd substantiv, inte verb
-   - Plural former för collections
-   - Konsekvent case (kebab-case eller camelCase)
-
-2. **HTTP-metoder**
-   - GET för läsning
-   - POST för skapande
-   - PUT för fullständig uppdatering  
-   - PATCH för partiell uppdatering
-   - DELETE för borttagning
-
-3. **Statuskoder**
-   - 200 OK för framgångsrika operationer
-   - 201 Created för skapade resurser
-   - 400 Bad Request för klientfel
-   - 401 Unauthorized för autentiseringsfel
-   - 403 Forbidden för auktoriseringsfel
-   - 404 Not Found för icke-existerande resurser
-   - 500 Internal Server Error för serverfel
-
-4. **Säkerhet**
-   - OAuth 2.0 för auktorisering
-   - HTTPS för all kommunikation
-   - Rate limiting för API-skydd
-   - Versionering för bakåtkompatibilitet
-```
-
-#### Datamodellering
-```markdown
-### Grundläggande entiteter för högre utbildning
-
-#### Student
-- Personidentifikation
-- Utbildningsprogression
-- Kursregistreringar
-- Prestationshistorik
-
-#### Kurs
-- Kursinformation
-- Lärandemål
-- Examinationsformer
-- Resurser och material
-
-#### Program
-- Programstruktur
-- Progression och förutsättningar
-- Kompetensutfall
-- Kvalitetsindikationer
-
-#### Personal
-- Roller och ansvar
-- Kompetensprofiler
-- Undervisningsbelastning
-- Forskningsaktiviteter
-```
-
-### Säkerhetsmall
-
-#### Identitets- och åtkomsthantering
-```markdown
-### IAM-arkitektur för högre utbildning
-
-#### Identitetskällor
-- Primär: Personalregister/Studentregister
-- Sekundär: Externa identitetsleverantörer (eduGAIN, Google, Microsoft)
-- Gäster: Temporära konton för externa användare
-
-#### Autentiseringsmetoder
-- Primär: SAML 2.0 / OpenID Connect
-- Flerfaktor: TOTP, SMS, säkerhetsnycklar
-- Legacy: LDAP för äldre system
-
-#### Auktorisering
-- Rollbaserad åtkomstkontroll (RBAC)
-- Attributbaserad åtkomstkontroll (ABAC)
-- Just-in-time access för privilegierade operationer
-
-#### Översyn och revision
-- Regelbunden access review (kvartalsvis)
-- Automatisk deprovisionering vid avslutade anställningar
-- Loggning och övervakning av privilegierade åtkomster
-```
+[Detta avsnitt kommer att innehålla konkreta exempel och mallar för implementering av referensarkitekturer enligt HERAF.]
 
 ---
 
-## Best practices och lärdomar
+## Begreppsreferenser
 
-### Vanliga fallgropar och hur du undviker dem
-
-#### 1. "Big Bang"-implementering
-**Problem**: Försöker implementera hela arkitekturen på en gång.
-**Lösning**: 
-- Använd inkrementell implementation
-- Börja med pilotprojekt i mindre skala
-- Bygga på framgångar och lär från misstag
-
-#### 2. Bristande intressentengagemang
-**Problem**: Tekniska team arbetar isolerat från verksamheten.
-**Lösning**:
-- Regelbundna workshops med slutanvändare
-- Representanter från alla HERAM-vyer i projektteamet
-- Kontinuerlig validering av designbeslut
-
-#### 3. Överarkitekturer
-**Problem**: För komplex design som är svår att implementera och underhålla.
-**Lösning**:
-- Följ KISS-principen (Keep It Simple, Stupid)
-- Börja enkelt och lägg till komplexitet när det behövs
-- Regelbunden arkitekturgranskning
-
-#### 4. Vendor lock-in
-**Problem**: Blir för beroende av specifika leverantörer.
-**Lösning**:
-- Prioritera öppna standarder
-- Undvik proprietära format för kritiska data
-- Planera för migrering från dag ett
-
-### Framgångsfaktorer
-
-#### 1. Stark ledningsförankring
-- Tydligt mandat från ledning
-- Dedikerade resurser
-- Stöd vid motstånd
-
-#### 2. Kompetent projektteam
-- Mix av domänexpertis och teknisk kunskap
-- Arkitekter med högskoleerfarenhet
-- Change management-kompetens
-
-#### 3. Användarcentrerat arbetssätt
-- Tidiga användartest och prototyper
-- Iterativ design med feedback-loopar
-- Fokus på verklig användarnytta
-
-#### 4. Kvalitetssäkring
-- Kontinuerlig testning och validering
-- Kodgranskning och arkitekturreview
-- Prestanda- och säkerhetstestning
+| Begrepp | Definition | Referenser |
+|---------|------------|------------|
+| **Referensarkitektur** | En referensarkitektur är en mall eller ramverk som beskriver en rekommenderad struktur och organisering inom ett specifikt område. Den fungerar som en överenskommen vägledning och standardiseringsgrund för hur en lösning inom ett visst område bör implementeras. | DoD Reference Architecture White Paper<br><br>Reference architecture - Wikipedia<br><br>Referensarkitektur för Identitet och åtkomst |
 
 ---
 
-## Verktyg och resurser
+## Bilagor
 
-### Rekommenderade verktyg för arkitekturarbete
-
-#### Modellering och dokumentation
-- **ArchiMate/TOGAF**: För enterprisearkitektur
-- **C4 Model**: För mjukvaruarkitektur
-- **Draw.io/Lucidchart**: För diagramskapande
-- **Confluence/Notion**: För dokumentation
-
-#### Utveckling och integration
-- **OpenAPI/Swagger**: För API-dokumentation
-- **Postman**: För API-testning
-- **Jenkins/GitHub Actions**: För CI/CD
-- **Docker/Kubernetes**: För containerisering
-
-#### Övervakning och drift
-- **Prometheus/Grafana**: För metriker och övervakning
-- **ELK Stack**: För logghantering
-- **SIEM-lösningar**: För säkerhetsövervakning
-
-### Utbildningsresurser
-
-#### Certifieringar och kurser
-- **TOGAF**: Enterprise Architecture certification
-- **ArchiMate**: Modeling notation för EA
-- **SABSA**: Säkerhetsarkitektur
-- **AWS/Azure/GCP**: Cloud architecture
-
-#### Böcker och publikationer
-- "Enterprise Architecture as Strategy" - Ross, Weill & Robertson
-- "Building Evolutionary Architectures" - Ford, Parsons & Kua
-- "Fundamentals of Software Architecture" - Richards & Ford
-
-#### Konferenser och communities
-- **EDUCAUSE**: Teknologi inom högre utbildning
-- **Microservices & Software Architecture**: Arkitekturkonferenser
-- **Local meetups**: Arkitektgrupper lokalt
+- **[B01]** HERAM Begreppsmodell – Konceptbeskrivning
+- **[B02]** HERAM Referensarkitektur – Styrning
 
 ---
 
-## Framtid och utveckling
-
-### Emerging technologies och deras påverkan
-
-#### Artificiell intelligens och maskininlärning
-**Möjligheter**:
-- Personaliserat lärande och adaptiva system
-- Automatiserad innehållsanalys och feedback
-- Prediktiv analys för studentsupport
-
-**Utmaningar**:
-- Etiska överväganden och bias
-- Transparens i algoritmiska beslut
-- Datakrav och integritetsfrågor
-
-**Arkitekturimplikationer**:
-- MLOps-pipelines för modellhantering
-- Datasjöar för storskalig dataanalys
-- Edge computing för real-time inference
-
-#### Blockchain och distribuerade system
-**Möjligheter**:
-- Säkra och verifierbara akademiska credentials
-- Decentraliserad identitetshantering
-- Transparent forskningsdata och peer review
-
-**Utmaningar**:
-- Skalbarhet och energiförbrukning
-- Regulatoriska osäkerheter
-- Komplexitet och mognadsnivå
-
-**Arkitekturimplikationer**:
-- Hybrid blockchain-traditionella system
-- Smart contracts för automatiska processer
-- Interoperabilitet mellan blockchains
-
-#### Extended Reality (XR) - VR/AR/MR
-**Möjligheter**:
-- Immersiva lärandeupplevelser
-- Virtuella laboratorier och simulationer
-- Fjärrlaborationer och praktisk utbildning
-
-**Utmaningar**:
-- Höga hårdvarukrav
-- Contentutveckling och underhåll
-- Användarvänlighet och adoption
-
-**Arkitekturimplikationer**:
-- High-performance grafikprocessering
-- Låg latens för real-time interaktion
-- Skalbar contentdelivery
-
-### Hållbarhet och miljöpåverkan
-
-#### Green IT-initiativ
-- **Energieffektiv infrastruktur**: Cloud-first strategi och moderna datacenter
-- **Cirkulär ekonomi**: Återanvändning och återvinning av hårdvara
-- **Digital transformation**: Minska pappersförbrukning och resor
-
-#### Sustainable development goals (SDG)
-- **SDG 4**: Säkerställa inkluderande och rättvis utbildning för alla
-- **SDG 9**: Bygga motståndskraftig infrastruktur och främja innovation
-- **SDG 17**: Stärka genomförandemedel och återvitalisera det globala partnerskapet
-
-### Community och samverkan
-
-#### Öppen källkod och collaboration
-HERAF utvecklas som en gemenskapsdriven initiative. Vi uppmuntrar:
-
-- **Bidrag från community**: Nya principer, mallar och best practices
-- **Implementationserfarenheter**: Dela lärdomar och utmaningar  
-- **Forskningssamverkan**: Empiriska studier av arkitektureffektivitet
-
-#### Internationell standardisering
-- **IMS Global**: Learning Tools Interoperability (LTI) och andra utbildningsstandarder
-- **1EdTech**: Comprehensive Learner Record (CLR) och digitala credentials
-- **IEEE**: Standarder för utbildningsteknologi och learning analytics
-
----
-
-## Slutsats
-
-HERAF representerar en mognad inom arkitekturarbete för högre utbildning. Genom att kombinera den teoretiska grunden i HERAM med praktisk vägledning och beprövade principer, skapar vi förutsättningar för:
-
-- **Effektivare tekniska lösningar** som verkligen stödjer utbildning och forskning
-- **Jämförbara arkitekturer** som möjliggör lärande mellan institutioner  
-- **Hållbara system** som kan utvecklas och anpassas över tid
-- **Innovation och excellens** inom både utbildning och forskning
-
-### Nästa steg för dig
-
-1. **Utvärdera dina behov**: Vilka arkitekturutmaningar har din organisation?
-2. **Börja smått**: Välj ett begränsat område för pilotimplementation
-3. **Engagera intressenter**: Säkerställ bred förankring från start
-4. **Dokumentera och dela**: Bidra tillbaka till HERAF-communityn
-
-### Fortsatt utveckling
-
-HERAF är ett levande dokument som utvecklas tillsammans med sektorns behov. Vi välkomnar:
-
-- **Feedback och förslag** på förbättringar
-- **Fallstudier** från implementationer
-- **Nya principer och patterns** baserade på praktisk erfarenhet
-- **Forskningsbidrag** som validerar och utvecklar ramverket
-
-Tillsammans skapar vi framtidens arkitektur för högre utbildning - en arkitektur som verkligen gör skillnad för studenter, forskare och samhälle.
-
----
-
-*Detta dokument uppdaterades senast: {datum}*  
-*Version: 1.0*  
-*Bidrag och feedback välkomnas via: [kontaktinformation]*
+*Dokumentversion: 0.5-Alfa*  
+*Datum: 2025-11-12*
