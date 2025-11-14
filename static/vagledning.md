@@ -193,6 +193,8 @@ De skapande aktiviteterna är de som genererar den slutgiltiga referensarkitektu
 
 Omfång handlar om att specificera ramarna vid skapandet eller en ny iteration av en referensarkitektur. Syftet är att definiera vad arbetet ska omfatta, vilken målgrupp som avses och vilka angelägenheter som ska adresseras.
 
+
+
 Arbetet fokuserar på att skapa en tydlig avgränsning och en gemensam förståelse för syftet med referensarkitekturen samt vilka som är den primära målgruppen.
 
 Omfång innehåller följande delaktiviteter:
