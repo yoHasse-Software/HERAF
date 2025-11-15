@@ -275,8 +275,8 @@
 				<BookOpen class="w-8 h-8 mr-3" />
 				<h1 class="text-3xl font-bold">Vägledningen</h1>
 			</div>
-			<p class="text-blue-100 text-lg mb-2">Hur man använder ramverket effektivt.</p>
-			<p class="text-blue-200">Beskriver HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket. </p>
+			<p class="text-purple-100 text-lg mb-2">Hur man använder ramverket effektivt.</p>
+			<p class="text-purple-200">Beskriver HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket. </p>
 
 		</div>
 		
