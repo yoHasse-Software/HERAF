@@ -1,69 +1,20 @@
 <script lang="ts">
-	import { ChevronRight, Search, BookOpen, Menu, ArrowUp } from '@lucide/svelte';
+	import { BookOpen, ArrowUp, Menu } from '@lucide/svelte';
 	import { onMount } from 'svelte';
+	import { contentData } from '$lib/content-data.generated.js';
 	import { getSidebarContext } from '$lib/sidebar-state.svelte';
-    import { getConcept, getPrinciple, type Concept, type Principle } from '$lib/content';
-	import { loadGuidanceContent, getNavigationSections, type GuidanceContent } from '$lib/guidance-content';
+    import { getConcept, getPrinciple } from '$lib/content';
 	
-	let guidanceContent = $state<Promise<GuidanceContent | null>>();
-	let isLoading = $state(true);
-	let error = $state<string | null>(null);
+	// Get the pre-generated guidance content
+	const guidance = contentData.guidance;
 	
+	// Get sidebar context
 	const sidebar = getSidebarContext();
 	
 	let currentSection = $state('');
-	let searchQuery = $state('');
 	let showTOC = $state(false);
 	let showBackToTop = $state(false);
-	let filteredContent = $state<string | null>(null);
-	
-	// Search functionality
-	function performSearch(query: string, content: string): string {
-		if (!query.trim() || query.length < 2) {
-			return content;
-		}
-		
-		// Create a case-insensitive regex with word boundaries
-		const searchRegex = new RegExp(`(${query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-		
-		// Highlight matches with a yellow background
-		return content.replace(searchRegex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
-	}
-	
-	// Clear search and scroll to first match
-	function handleSearch() {
-		if (!searchQuery.trim()) {
-			filteredContent = null;
-			return;
-		}
-		
-		// Wait for content to be available
-		guidanceContent?.then(gContent => {
-			if (gContent) {
-				filteredContent = performSearch(searchQuery, gContent.fullContent);
-				// Scroll to first match after a brief delay
-				setTimeout(() => {
-					const firstMatch = document.querySelector('mark');
-					if (firstMatch) {
-						firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-					}
-				}, 100);
-			}
-		});
-	}
-	
-	// Clear search when query is empty
-	$effect(() => {
-		if (!searchQuery.trim()) {
-			filteredContent = null;
-		}
-	});
-	
-	
-	function scrollToTop() {
-		window.scrollTo({ top: 0, behavior: 'smooth' });
-	}
-	
+
 	function openTermInSidebar(termName: string) {
 		const concept = getConcept(termName);
 		if (concept) {
@@ -81,47 +32,46 @@
 	// Handle scroll events for current section tracking and back-to-top button
 	function handleScroll() {
 		const scrollTop = window.scrollY;
-		// Show back-to-top button when scrolled down
 		showBackToTop = scrollTop > 500;
-		
 	}
+	
 
-	// Dynamically determine which section should be highlighted based on actual scroll position
+	// Determine which section should be highlighted based on scroll position
 	function updateCurrentSection() {
-		const sections = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
+		const sections = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id], .guidance-content h4[id]');
 		if (sections.length === 0) return;
 
-		// Get the actual scroll margin from CSS
-		const firstSection = sections[0] as HTMLElement;
-		const scrollMargin = parseInt(getComputedStyle(firstSection).scrollMarginTop) || 0;
+		const scrollMargin = 120; // Match the CSS scroll-margin-top
+		const scrollPos = window.scrollY + scrollMargin + 50; // Add some offset for better UX
 		
 		let current = '';
-		let closestSection: string = "";
-		let closestDistance = Infinity;
-
-		sections.forEach((section) => {
-			const rect = section.getBoundingClientRect();
-			// Calculate distance from the "active zone" (top of viewport + scroll margin)
-			const activeZone = scrollMargin;
-			const distanceFromActiveZone = Math.abs(rect.top - activeZone);
+		
+		// Find the section that's currently being viewed
+		// We'll use the last section whose top position is above the current scroll position
+		for (let i = sections.length - 1; i >= 0; i--) {
+			const section = sections[i] as HTMLElement;
+			const sectionTop = section.offsetTop;
 			
-			// Section is visible and closest to the active zone
-			if (rect.bottom > 0 && rect.top < window.innerHeight) {
-				if (distanceFromActiveZone < closestDistance) {
-					closestDistance = distanceFromActiveZone;
-					closestSection = section.id;
-				}
+			if (scrollPos >= sectionTop) {
+				current = section.id;
+				break;
 			}
-		});
-
-		// If we found a closest section, use it
-		if (closestSection) {
-			current = closestSection;
 		}
 		
-		if (current !== currentSection) {
+		// Fallback to first section if we're at the very top
+		if (!current && sections.length > 0) {
+			const firstSection = sections[0] as HTMLElement;
+			current = firstSection.id;
+		}
+
+		if (current && current !== currentSection) {
 			currentSection = current;
 		}
+	}
+
+	
+	function scrollToTop() {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	let intersectionObserver: IntersectionObserver | null = null;
@@ -133,22 +83,19 @@
 			intersectionObserver.disconnect();
 		}
 
-		// Get the actual scroll margin dynamically
-		const headings = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id]');
+		// Get all headings for observation
+		const headings = document.querySelectorAll('.guidance-content h1[id], .guidance-content h2[id], .guidance-content h3[id], .guidance-content h4[id]');
 		if (headings.length === 0) return;
 
-		const firstHeading = headings[0] as HTMLElement;
-		const scrollMargin = parseInt(getComputedStyle(firstHeading).scrollMarginTop) || 0;
-
-		// Set up intersection observer with dynamic root margin based on actual CSS
+		// Set up intersection observer with a simpler configuration
 		intersectionObserver = new IntersectionObserver(
 			(entries) => {
-				// Use the same logic as handleScroll for consistency
+				// Update current section when any heading intersects
 				updateCurrentSection();
 			},
 			{ 
-				threshold: [0, 0.1, 0.5, 1], 
-				rootMargin: `-${scrollMargin + 20}px 0px -50% 0px` // Dynamic margin based on actual CSS
+				threshold: [0, 0.1, 0.5, 1],
+				rootMargin: '-120px 0px -60% 0px' // Account for fixed header and only trigger when section is well into view
 			}
 		);
 
@@ -158,7 +105,7 @@
 		});
 	}
 
-	// Setup concept link handlers for interactive content
+		// Setup concept link handlers for interactive content
 	function setupConceptLinkHandlers() {
 		// Add click handlers for concept links
 		const conceptLinks = document.querySelectorAll('.guidance-content a[href^="concept:"]');
@@ -169,24 +116,6 @@
 				if (href?.startsWith('concept:')) {
 					const conceptSlug = href.replace('concept:', '');
 					openTermInSidebar(conceptSlug);
-				}
-			});
-		});
-		
-		// Setup expandable section handlers
-		const expandButtons = document.querySelectorAll('.guidance-content .expand-toggle');
-		expandButtons.forEach(button => {
-			button.addEventListener('click', (e) => {
-				const button = e.currentTarget as HTMLButtonElement;
-				const content = button.nextElementSibling as HTMLElement;
-				const section = button.parentElement as HTMLElement;
-				
-				if (content.style.display === 'none' || !content.style.display) {
-					content.style.display = 'block';
-					section.classList.add('expanded');
-				} else {
-					content.style.display = 'none';
-					section.classList.remove('expanded');
 				}
 			});
 		});
@@ -214,70 +143,36 @@
 	}
 	
 	onMount(() => {
-		let cancelled = false;
-
-		
-		try {
-			guidanceContent = loadGuidanceContent();
-			if (cancelled) return; 
-
-			isLoading = false;
-			
-			// Wait for content to be loaded and rendered
-			setTimeout(() => {
-				if (!cancelled) {
-					setupSectionTracking();
-					setupConceptLinkHandlers();
-					// Initial section update
-					updateCurrentSection();
-				}
-			}, 100);
-		} catch (err: any) {
-			if (cancelled) return;
-			error = err.message;
-			isLoading = false;
-		}
-		
-
-		// sync setup
 		window.addEventListener('scroll', handleScroll);
+		
+		// Initial section update
+		setTimeout(() => {
+			setupSectionTracking();
+			setupConceptLinkHandlers();
+			updateCurrentSection();
+		}, 100);
 
-		// cleanup (must be returned from here)
+
+		// Add click event listeners to concept and principle links
 		return () => {
-			cancelled = true;
 			window.removeEventListener('scroll', handleScroll);
 			if (intersectionObserver) {
 				intersectionObserver.disconnect();
 			}
 		};
 	});
-
 </script>
 
-
-<div class="min-h-screen bg-gray-50 ">
+<div class="min-h-screen bg-gray-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-w-0">
 		<!-- Page Header -->
-		 {#await guidanceContent}
-			<!-- Navigation -->
-			<div class="space-y-2">
-				<div class="h-8 bg-gray-200 rounded animate-pulse"></div>
-				<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
-				<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
-				<div class="h-6 bg-gray-200 rounded animate-pulse ml-3"></div>
-				<div class="h-6 bg-gray-200 rounded animate-pulse"></div>
-			</div>
-		{:then gContent}
-		{@const navSections = getNavigationSections(gContent?.sections || [])}
-		{@const allSections = navSections.flatMap(section => [section, ...(section.children || []), ...(section.children ? section.children.flatMap(child => child.children || []) : [])])}
 		<div class="bg-gradient-to-r from-[#352F44] to-[#5C5470] rounded-xl shadow-sm p-8 mb-8 text-white">
 			<div class="flex items-center mb-4">
 				<BookOpen class="w-8 h-8 mr-3" />
 				<h1 class="text-3xl font-bold">Vägledningen</h1>
 			</div>
-			<p class="text-blue-100 text-lg mb-2">Hur man använder ramverket effektivt.</p>
-			<p class="text-blue-200">Beskriver HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket. </p>
-
+			<p class="text-purple-100 text-lg mb-2">Hur man använder ramverket effektivt.</p>
+			<p class="text-purple-200">Beskriver HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket.</p>
 		</div>
 		
 		<div class="grid lg:grid-cols-5 gap-8 min-w-0">
@@ -289,72 +184,33 @@
 						onclick={() => showTOC = !showTOC}
 						class="lg:hidden w-full flex items-center justify-between p-3 bg-gray-100 rounded-lg mb-4"
 					>
-						<span class="font-semibold text-gray-900">Innehållsförteckning </span>
+						<span class="font-semibold text-gray-900">Innehållsförteckning</span>
 						<Menu class="w-4 h-4" />
 					</button>
 
 					<div class="lg:block" class:hidden={!showTOC}>
 						<h3 class="font-semibold text-gray-900 mb-4">Innehållsförteckning</h3>
-
-						{#if error}
-							<!-- Error State -->
-							<div class="text-center py-4">
-								<p class="text-sm text-gray-500">Kunde inte ladda navigering</p>
-							</div>
-						{/if}
 						
-						{#if navSections.length === 0}
-							<!-- Empty State -->
-							<div class="text-center py-4">
-								<p class="text-sm text-gray-500">Ingen navigering tillgänglig</p>
-							</div>
-						{:else}
-							<!-- Loaded Navigation -->
+						{#if guidance && guidance.sections}
 							<nav class="space-y-1 max-h-96 overflow-y-auto overflow-x-hidden pr-1">
-								{#each navSections as section}
+								{#each guidance.sections.filter(s => s.level <= 4) as section}
 									<a
 										href="#{section.id}"
 										class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm block
 											{currentSection === section.id 
 												? 'bg-[#352F44] text-white' 
 												: 'text-gray-700 hover:bg-gray-100'}
-											{section.level === 1 ? 'font-semibold' : section.level === 2 ? 'font-medium' : 'font-normal'}"
+											{section.level === 1 ? 'font-semibold' : section.level === 2 ? 'font-medium' : 'font-normal'}
+											{section.level === 2 ? 'ml-3' : section.level === 3 ? 'ml-6' : section.level === 4 ? 'ml-9' : ''}"
 									>
 										{section.title}
 									</a>
-									
-									<!-- Render children if they exist -->
-									{#if section.children && section.children.length > 0}
-										{#each section.children as child}
-											<a
-												href="#{child.id}"
-												class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-sm ml-4 block
-													{currentSection === child.id 
-														? 'bg-[#352F44] text-white' 
-														: 'text-gray-600 hover:bg-gray-100'}
-													{child.level === 3 ? 'text-xs' : 'text-sm'}"
-											>
-												{child.title}
-											</a>
-											
-											<!-- Render grandchildren if they exist -->
-											{#if child.children && child.children.length > 0}
-												{#each child.children as grandchild}
-													<a
-														href="#{grandchild.id}"
-														class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200 text-xs ml-8 block
-															{currentSection === grandchild.id 
-																? 'bg-[#352F44] text-white' 
-																: 'text-gray-500 hover:bg-gray-100'}"
-													>
-														{grandchild.title}
-													</a>
-												{/each}
-											{/if}
-										{/each}
-									{/if}
 								{/each}
 							</nav>
+						{:else}
+							<div class="text-center py-4">
+								<p class="text-sm text-gray-500">Ingen navigering tillgänglig</p>
+							</div>
 						{/if}
 					</div>
 					
@@ -362,70 +218,30 @@
 					<div class="mt-6 pt-6 border-t">
 						<div class="text-sm text-gray-600 mb-2">Du läser:</div>
 						<div class="text-xs font-medium text-[#352F44]">
-							{allSections.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
+							{guidance?.sections?.find(s => s.id === currentSection)?.title || 'Början av dokumentet'}
 						</div>
 					</div>
 				</div>
-
 			</div>
 			
 			<!-- Main Content Area -->
 			<div class="lg:col-span-4 min-w-0">
 				<div class="bg-white rounded-xl shadow-sm p-8 overflow-hidden min-w-0">
-					{#if isLoading}
-						<!-- Loading State -->
-						<div class="flex items-center justify-center py-12">
-							<div class="text-center">
-								<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#352F44] mx-auto mb-4"></div>
-								<p class="text-gray-600">Laddar vägledning...</p>
-							</div>
+					{#if guidance && guidance.htmlContent}
+						<!-- Pre-generated Guidance Content -->
+						<div class="prose max-w-none guidance-content concept-content min-w-0">
+							{@html guidance.htmlContent}
 						</div>
-					{:else if error}
-						<!-- Error State -->
-						<div class="text-center py-12">
-							<div class="text-red-500 mb-4">
-								<BookOpen class="w-12 h-12 mx-auto mb-2" />
-								<p class="text-lg font-semibold">Kunde inte ladda vägledningen</p>
-							</div>
-							<p class="text-gray-600 mb-4">{error}</p>
-							<button 
-								onclick={() => window.location.reload()}
-								class="bg-[#352F44] text-white px-4 py-2 rounded-lg hover:bg-[#5C5470] transition-colors"
-							>
-								Försök igen
-							</button>
-						</div>
-					{:else if gContent}
-						<!-- Guidance Content -->
-						<div class="prose max-w-none guidance-content min-w-0">
-							{@html filteredContent || gContent.fullContent}
-						</div>
-						{#if searchQuery.trim() && searchQuery.length >= 2 && filteredContent}
-							<div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-								<p class="text-sm text-yellow-800">
-									Sökning aktiv för: "<strong>{searchQuery}</strong>" 
-									<button 
-										onclick={() => { searchQuery = ''; filteredContent = null; }}
-										class="ml-2 underline hover:no-underline"
-									>
-										Rensa
-									</button>
-								</p>
-							</div>
-						{/if}
 					{:else}
 						<!-- Fallback -->
 						<div class="text-center py-12">
 							<BookOpen class="w-12 h-12 mx-auto mb-4 text-gray-400" />
-							<p class="text-gray-600">Inget innehåll att visa</p>
+							<p class="text-gray-600">Vägledningsinnehållet kunde inte laddas</p>
 						</div>
 					{/if}
 				</div>
 			</div>
-
 		</div>
-		{/await}
-
 	</div>
 	
 	<!-- Back to Top Button -->
