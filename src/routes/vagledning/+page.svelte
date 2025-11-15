@@ -2,7 +2,7 @@
 	import { ChevronRight, Search, BookOpen, Menu, ArrowUp } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { getSidebarContext } from '$lib/sidebar-state.svelte';
-    import { getConcept, type Concept } from '$lib/content';
+    import { getConcept, getPrinciple, type Concept, type Principle } from '$lib/content';
 	import { loadGuidanceContent, getNavigationSections, type GuidanceContent } from '$lib/guidance-content';
 	
 	let guidanceContent = $state<Promise<GuidanceContent | null>>();
@@ -15,6 +15,49 @@
 	let searchQuery = $state('');
 	let showTOC = $state(false);
 	let showBackToTop = $state(false);
+	let filteredContent = $state<string | null>(null);
+	
+	// Search functionality
+	function performSearch(query: string, content: string): string {
+		if (!query.trim() || query.length < 2) {
+			return content;
+		}
+		
+		// Create a case-insensitive regex with word boundaries
+		const searchRegex = new RegExp(`(${query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+		
+		// Highlight matches with a yellow background
+		return content.replace(searchRegex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
+	}
+	
+	// Clear search and scroll to first match
+	function handleSearch() {
+		if (!searchQuery.trim()) {
+			filteredContent = null;
+			return;
+		}
+		
+		// Wait for content to be available
+		guidanceContent?.then(gContent => {
+			if (gContent) {
+				filteredContent = performSearch(searchQuery, gContent.fullContent);
+				// Scroll to first match after a brief delay
+				setTimeout(() => {
+					const firstMatch = document.querySelector('mark');
+					if (firstMatch) {
+						firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					}
+				}, 100);
+			}
+		});
+	}
+	
+	// Clear search when query is empty
+	$effect(() => {
+		if (!searchQuery.trim()) {
+			filteredContent = null;
+		}
+	});
 	
 	
 	function scrollToTop() {
@@ -25,6 +68,13 @@
 		const concept = getConcept(termName);
 		if (concept) {
 			sidebar.openConcept(concept);
+		}
+	}
+	
+	function openPrincipleInSidebar(principleId: string) {
+		const principle = getPrinciple(principleId);
+		if (principle) {
+			sidebar.openPrinciple(principle);
 		}
 	}
 	
@@ -157,8 +207,7 @@
 				const href = (e.target as HTMLAnchorElement).getAttribute('href');
 				if (href?.startsWith('principle:')) {
 					const principleSlug = href.replace('principle:', '');
-					// You could extend this to open principles in sidebar
-					console.log('Open principle:', principleSlug);
+					openPrincipleInSidebar(principleSlug);
 				}
 			});
 		});
@@ -221,24 +270,14 @@
 		{:then gContent}
 		{@const navSections = getNavigationSections(gContent?.sections || [])}
 		{@const allSections = navSections.flatMap(section => [section, ...(section.children || []), ...(section.children ? section.children.flatMap(child => child.children || []) : [])])}
-		<div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-			<h1 class="text-3xl font-bold text-[#352F44] mb-2">
-				{gContent?.title || 'HERAF - Vägledning'}
-			</h1>
-			<p class="text-gray-600">Det levande dokumentet för att skapa referensarkitekturer inom högre utbildning </p>
-			
-			<!-- Search Bar -->
-			<div class="mt-6 max-w-md">
-				<div class="relative">
-					<Search class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-					<input 
-						bind:value={searchQuery}
-						type="text" 
-						placeholder="Sök i vägledningen..."
-						class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#352F44] focus:border-transparent"
-					>
-				</div>
+		<div class="bg-gradient-to-r from-[#352F44] to-[#5C5470] rounded-xl shadow-sm p-8 mb-8 text-white">
+			<div class="flex items-center mb-4">
+				<BookOpen class="w-8 h-8 mr-3" />
+				<h1 class="text-3xl font-bold">Vägledningen</h1>
 			</div>
+			<p class="text-blue-100 text-lg mb-2">Hur man använder ramverket effektivt.</p>
+			<p class="text-blue-200">Beskriver HERAF och hur man använder det, processmodell och processbeskrivning hur man skapar en referensarkitektur och slutligen exempel som följer ramverket. </p>
+
 		</div>
 		
 		<div class="grid lg:grid-cols-5 gap-8 min-w-0">
@@ -359,8 +398,21 @@
 					{:else if gContent}
 						<!-- Guidance Content -->
 						<div class="prose max-w-none guidance-content min-w-0">
-							{@html gContent.fullContent}
+							{@html filteredContent || gContent.fullContent}
 						</div>
+						{#if searchQuery.trim() && searchQuery.length >= 2 && filteredContent}
+							<div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+								<p class="text-sm text-yellow-800">
+									Sökning aktiv för: "<strong>{searchQuery}</strong>" 
+									<button 
+										onclick={() => { searchQuery = ''; filteredContent = null; }}
+										class="ml-2 underline hover:no-underline"
+									>
+										Rensa
+									</button>
+								</p>
+							</div>
+						{/if}
 					{:else}
 						<!-- Fallback -->
 						<div class="text-center py-12">
@@ -577,6 +629,23 @@
 		padding: 0 1px;
 	}
 	
+	:global(.guidance-content a[href^="principle:"]) {
+		color: #0D3B4F;
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	:global(.guidance-content a[href^="principle:"]:hover) {
+		color: #456882;
+		text-decoration-style: solid;
+		background-color: rgba(13, 59, 79, 0.05);
+		padding: 0 1px;
+	}
+	
 	/* Section references */
 	:global(.guidance-content .section-ref) {
 		color: #352F44;
@@ -596,20 +665,20 @@
 	
 	/* Principle references */
 	:global(.guidance-content .principle-ref) {
-		color: #5C5470;
-		text-decoration: none;
-		background-color: rgba(92, 84, 112, 0.1);
-		padding: 2px 6px;
-		border-radius: 4px;
-		font-size: 0.9em;
-		border: 1px solid rgba(92, 84, 112, 0.2);
+		color: #0D3B4F;
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		cursor: pointer;
 		transition: all 0.2s ease;
-		font-weight: 500;
 	}
 	
 	:global(.guidance-content .principle-ref:hover) {
-		background-color: rgba(92, 84, 112, 0.2);
-		border-color: rgba(92, 84, 112, 0.4);
+		color: #456882;
+		text-decoration-style: solid;
+		background-color: rgba(13, 59, 79, 0.05);
+		padding: 0 1px;
 	}
 	
 	/* Callout boxes */
@@ -821,5 +890,19 @@
 		:global(.guidance-content th, .guidance-content td) {
 			padding: 0.75rem;
 		}
+	}
+	
+	/* Search highlight styling */
+	:global(.guidance-content mark) {
+		background-color: #fef08a;
+		padding: 2px 4px;
+		border-radius: 3px;
+		font-weight: 500;
+		animation: highlight-flash 2s ease-in-out;
+	}
+	
+	@keyframes highlight-flash {
+		0%, 100% { background-color: #fef08a; }
+		50% { background-color: #facc15; }
 	}
 </style>

@@ -6,38 +6,38 @@
 	<!-- Hero Section -->
 	<div class="text-center mb-16">
 		<h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-			<span class="text-[#352F44]">HERAF</span>
-			<span class="text-gray-600">&</span>
-			<span class="text-[#0D3B4F]">HERAM</span>
+			<span class="text-gray-900">HERAF</span>
 		</h1>
 		<h2 class="text-xl md:text-2xl text-gray-700 mb-8 max-w-4xl mx-auto">
 			Higher Education Reference Architecture Framework
 		</h2>
-		<p class="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-			Ett ramverk som vägleder hur referensarkitekturer ska skapas, struktureras och dokumenteras 
-			inom högskole- och universitetssektorn.
-		</p>
+
 	</div>
 
 	<!-- What is HERAF Section -->
 	<div class="bg-white rounded-xl shadow-lg p-8 md:p-12 mb-16">
 		<h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Vad är HERAF?</h3>
+		<div>
+					<p class="text-gray-700">
+						Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och HERAM.
+Varje område innehåller även komponenter som hjälper under framtagningen. Följande konceptuella modell (figur c) visar relationerna mellan komponenterna i respektive område.
+					</p>
+		</div>
 		
 		<div class="grid md:grid-cols-2 gap-12 items-center">
 			<div class="space-y-6">
 				<div class="border-l-4 border-[#352F44] pl-6">
-					<h4 class="text-xl font-semibold text-[#352F44] mb-3">HERAF Framework</h4>
+					<h4 class="text-xl font-semibold text-[#352F44] mb-3">Vägledningen</h4>
 					<p class="text-gray-700">
-						Ger en konsekvent väg för universitet att utveckla referensarkitekturer genom 
-						att definiera en process, gemensamma begrepp och rekommenderade metoder.
+						Vägledningen är det material som vägleder och hjälper användningen av ramverket samt skapandet av en referensarkitektur.
 					</p>
 				</div>
 				
 				<div class="border-l-4 border-[#0D3B4F] pl-6">
-					<h4 class="text-xl font-semibold text-[#0D3B4F] mb-3">HERAM Modell</h4>
+					<h4 class="text-xl font-semibold text-[#0D3B4F] mb-3">HERAM</h4>
 					<p class="text-gray-700">
-						Den konceptuella modellen som definierar kärnbegreppen, relationerna, principerna 
-						och strukturerna som alla referensarkitekturer bör använda.
+						HERAM utgör den teoretiska och strukturella grunden för hur referensarkitekturer i ramverket ska struktureras och beskrivas. 
+
 					</p>
 				</div>
 			</div>
@@ -45,18 +45,16 @@
 			<!-- Simple Framework Diagram -->
 			<div class="bg-gray-50 p-8 rounded-lg">
 				<div class="text-center">
-					<div class="bg-[#352F44] text-white py-4 px-6 rounded-lg mb-4">
-						<h5 class="font-semibold">HERAF</h5>
-						<p class="text-sm opacity-90">Ramverket</p>
-					</div>
-					<div class="text-gray-400 mb-4">innehåller</div>
-					<div class="bg-[#0D3B4F] text-white py-4 px-6 rounded-lg mb-4">
-						<h5 class="font-semibold">HERAM</h5>
-						<p class="text-sm opacity-90">Modellen</p>
-					</div>
-					<div class="text-gray-400 mb-4">+</div>
-					<div class="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">
-						<p class="text-sm">Vägledning & Process</p>
+					<div class="bg-white text-gray-900 border border-gray-300 py-6 px-6 rounded-lg">
+						<div class="mb-4">
+							<h5 class="font-semibold text-lg">HERAF</h5>
+							<p class="text-sm text-gray-600">Ramverket</p>
+						</div>
+						<div class="text-gray-400 text-sm mb-4">innehåller</div>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+							<img src="img/guidance_logo_w_text.png" alt="Vägledningen" class="w-full max-w-48 mx-auto" />
+							<img src="img/heram_logo_w_text.png" alt="HERAM" class="w-full max-w-48 mx-auto" />
+						</div>
 					</div>
 				</div>
 			</div>
@@ -64,7 +62,7 @@
 	</div>
 
 	<!-- Main Navigation Cards -->
-	<div class="grid md:grid-cols-3 gap-8 mb-16">
+	<div class="grid md:grid-cols-2 gap-8 mb-16">
 		<!-- Vägledningen -->
 		<a href="/vagledning" class="group">
 			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#352F44] h-full">
@@ -105,28 +103,6 @@
 					<li>• Klickbara relationer</li>
 					<li>• Principer och riktlinjer</li>
 					<li>• Visuell förståelse</li>
-				</ul>
-			</div>
-		</a>
-
-		<!-- Processen -->
-		<a href="/process" class="group">
-			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#5C5470] h-full">
-				<div class="flex items-center justify-between mb-6">
-					<div class="bg-[#5C5470] p-3 rounded-lg">
-						<GitBranch class="w-8 h-8 text-white" />
-					</div>
-					<ArrowRight class="w-6 h-6 text-gray-400 group-hover:text-[#5C5470] transition-colors" />
-				</div>
-				<h3 class="text-2xl font-bold text-[#5C5470] mb-4">Processen</h3>
-				<p class="text-gray-700 mb-4">
-					Interaktiv stegvy för att skapa referensarkitekturer med klickbara aktiviteter.
-				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li>• Klickbar processkarta</li>
-					<li>• Fyra huvudsteg</li>
-					<li>• Kontinuerliga aktiviteter</li>
-					<li>• Praktiskt arbetsverktyg</li>
 				</ul>
 			</div>
 		</a>

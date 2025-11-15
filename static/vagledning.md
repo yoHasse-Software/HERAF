@@ -1,4 +1,4 @@
-# HERAF - Vägledning
+# Vägledning
 *Higher Education Reference Architecture Framework*
 
 ![HERAF Vägledning](img/heraf_vagledning_logo.png)
@@ -94,7 +94,7 @@ För praktiskt arbete rekommenderas att följa kapitlet Skapa referensarkitektur
 ---
 
 ## HERAF
-![HERAF - Vägledning & HERAM](img/heraf_vagledning_o_heram.png)
+![Primära områden som HERAF består av](img/heraf_vagledning_o_heram.png)
 
 Ramverket innehåller material som beskriver, visualiserar och vägleder i hur man skapar en referensarkitektur. På en övergripande nivå innehåller ramverket två huvudsakliga områden, vägledningen och [HERAM].
 
@@ -193,7 +193,12 @@ De skapande aktiviteterna är de som genererar den slutgiltiga referensarkitektu
 
 Omfång handlar om att specificera ramarna vid skapandet eller en ny iteration av en referensarkitektur. Syftet är att definiera vad arbetet ska omfatta, vilken målgrupp som avses och vilka angelägenheter som ska adresseras.
 
+```note Relaterade principer
+_Följande principer ska beaktas vid arbete med omfång:_
+* [P:EAP004]
+* [P:P002]
 
+```
 
 Arbetet fokuserar på att skapa en tydlig avgränsning och en gemensam förståelse för syftet med referensarkitekturen samt vilka som är den primära målgruppen.
 

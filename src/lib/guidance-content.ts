@@ -1,5 +1,5 @@
 import { marked } from 'marked';
-import { getConceptsArray } from './content';
+import { getConceptsArray, getPrinciples } from './content';
 
 export interface GuidanceSection {
     id: string;
@@ -149,11 +149,8 @@ function generateTOC(sections: GuidanceSection[]): GuidanceSection[] {
     return toc;
 }
 
-/**
- * Process content to add interactive features like concept links
- */
-function processInteractiveContent(content: string): string {
-    const concepts = getConceptsArray();
+function processConcepts(content: string): string {
+        const concepts = getConceptsArray();
     let processedContent = content;
 
     // Create a map of concept titles to their slugs for easy lookup
@@ -206,9 +203,11 @@ function processInteractiveContent(content: string): string {
             return match;
         });
     });
-    
+    return processedContent;
+}
 
-    
+function processImages(content: string): string {
+    let processedContent = content;
     // Process image captions and enhance image display
     processedContent = processedContent.replace(/!\[([^\]]*)\]\(([^)]+)\)(\{([^}]+)\})?/g, (match, alt, src, _, attributes) => {
         let figureClass = '';
@@ -249,41 +248,13 @@ function processInteractiveContent(content: string): string {
             ${alt ? `<figcaption class="image-caption">${alt}</figcaption>` : ''}
         </figure>`;
     });
-    
-    // Process expandable sections
-    processedContent = processedContent.replace(/\+\+\+\s*(.*?)\s*\+\+\+(.*?)\+\+\+/gs, (match, title, content) => {
-        const expandId = 'expand-' + Math.random().toString(36).substr(2, 9);
-        return `<div class="expandable-section">
-            <button class="expand-toggle" onclick="toggleExpand('${expandId}')">
-                <span class="expand-icon">▶</span>
-                <span class="expand-title">${title.trim()}</span>
-            </button>
-            <div class="expand-content" id="${expandId}" style="display: none;">
-                ${content.trim()}
-            </div>
-        </div>`;
-    });
-    
-    // Process cross-references to sections within the document
-    processedContent = processedContent.replace(/\[\[([^\]]+)\]\]/g, (match, reference) => {
-        const sectionId = reference.toLowerCase()
-            .replace(/[åäö]/g, (char: string) => ({ 'å': 'a', 'ä': 'a', 'ö': 'o' }[char] || char))
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-');
-        return `<a href="#${sectionId}" class="section-ref" title="Gå till: ${reference}">${reference}</a>`;
-    });
-    
-    // Process principle references
-    processedContent = processedContent.replace(/\[P:([^\]]+)\]/g, (match, principleRef) => {
-        return `<a href="principle:${principleRef.toLowerCase()}" class="principle-ref" title="Visa princip: ${principleRef}">${principleRef}</a>`;
-    });
-    
-    // Process HERAM references - treat as concept for sidebar
-    processedContent = processedContent.replace(/\[HERAM\]/g, (match) => {
-        return `[${match.replace(/[\[\]]/g, '')}](concept:heram "Utforska HERAM-modellen")`;
-    });
 
-        // Process custom callout boxes (only for specific callout types, not programming languages)
+    return processedContent;
+}
+
+function processCallouts(content: string): string {
+    let processedContent = content;
+            // Process custom callout boxes (only for specific callout types, not programming languages)
     const calloutTypes = ['note', 'tip', 'warning', 'danger', 'info', 'important', 'example'];
     processedContent = processedContent.replace(/```(\w+)\s*(.*?)\n([\s\S]*?)```/gs, (match, type, titleLine, content) => {
         // Only process if it's a recognized callout type, otherwise leave it as a regular code block
@@ -301,6 +272,45 @@ function processInteractiveContent(content: string): string {
             </div>
             <div class="callout-content">${marked.parse(content?.trim() || '')}</div>
         </div>`;
+    });
+    return processedContent;
+}
+
+function processCrossReferences(content: string): string {
+    let processedContent = content;
+        // Process cross-references to sections within the document
+    processedContent = processedContent.replace(/\[\[([^\]]+)\]\]/g, (match, reference) => {
+        const sectionId = reference.toLowerCase()
+            .replace(/[åäö]/g, (char: string) => ({ 'å': 'a', 'ä': 'a', 'ö': 'o' }[char] || char))
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-');
+        return `<a href="#${sectionId}" class="section-ref" title="Gå till: ${reference}">${reference}</a>`;
+    });
+    return processedContent;
+}
+
+function processPrincipleReferences(content: string): string {
+    let processedContent = content;
+    const principles = getPrinciples().map(p => ({ id: p.metadata.id, header: p.metadata.principle }));
+        // Process principle references
+    processedContent = processedContent.replace(/\[P:([^\]]+)\]/g, (match, principleRef) => {
+        const principle = principles.find(p => p.id.toLowerCase() === principleRef.toLowerCase());
+        return principle ? `<a href="principle:${principle.id}" class="principle-ref" title="Visa princip: ${principle.id}">${principle.id} - ${principle.header}</a>` : match;
+    });
+    
+    return processedContent;
+}
+    
+
+/**
+ * Process content to add interactive features like concept links
+ */
+function processHeramReferences(content: string): string {
+    let processedContent = content;
+
+    // Process HERAM references - treat as concept for sidebar
+    processedContent = processedContent.replace(/\[HERAM\]/g, (match) => {
+        return `[${match.replace(/[\[\]]/g, '')}](concept:heram "Utforska HERAM-modellen")`;
     });
     
     return processedContent;
@@ -352,9 +362,18 @@ export async function loadGuidanceContent(): Promise<GuidanceContent> {
         const sections = await parseMarkdownToSections(rawContent);
         
         // Process content to add interactive features
-        const processedContent = processInteractiveContent(rawContent);
-        
+        const funcProcess = () => {
+            let processedContent = processConcepts(rawContent);
+            processedContent = processImages(processedContent);
+            processedContent = processPrincipleReferences(processedContent);
+            processedContent = processCrossReferences(processedContent);
+            processedContent = processHeramReferences(processedContent);
+            processedContent = processCallouts(processedContent);
 
+            return processedContent;
+        }
+        
+        const processedContent = funcProcess();
         
         // Extract title from first heading
         const titleMatch = processedContent.match(/^#\s+(.+)$/m);

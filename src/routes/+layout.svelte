@@ -1,4 +1,7 @@
+
 <script lang="ts">
+	export const prerender = true;
+	
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
@@ -15,7 +18,7 @@
 		{ path: '/', label: 'Start', icon: Home, description: 'Portalen' },
 		{ path: '/vagledning', label: 'Vägledning', icon: BookOpen, description: 'Levande dokument' },
 		{ path: '/heram', label: 'HERAM', icon: Brain, description: 'Interaktiv modell' },
-		{ path: '/process', label: 'Processen', icon: GitBranch, description: 'Skapa referensarkitektur' }
+		// { path: '/process', label: 'Processen', icon: GitBranch, description: 'Skapa referensarkitektur' }
 	];
 </script>
 
@@ -33,7 +36,6 @@
 				<div class="flex items-center">
 					<a href="/" class="text-2xl font-bold text-gray-900">
 						<span class="text-[#352F44]">HERAF</span>
-						<span class="text-sm text-gray-600 ml-2">Framework</span>
 					</a>
 				</div>
 				
