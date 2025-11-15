@@ -1,6 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import type { Principle, Concept } from '$lib/content';
 import type { Snippet } from 'svelte';
+import { resolve } from '$app/paths';
 
 // Generic sidebar content interface
 export interface SidebarContent {
@@ -82,7 +83,7 @@ class SidebarState {
 				type: 'concept'
 			},
 			footerContent: 'Utforska i HERAM',
-			footerHref: '/heram'
+			footerHref: resolve('/heram')
 		});
 	}
 	

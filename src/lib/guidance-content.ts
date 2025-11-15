@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import { getConceptsArray, getPrinciples } from './content';
+import { asset } from '$app/paths';
 
 export interface GuidanceSection {
     id: string;
@@ -243,8 +244,11 @@ function processImages(content: string): string {
         
         const styleAttr = imageStyle ? ` style="${imageStyle.trim()}"` : '';
         
+        // Resolve the image path using the asset function for proper base path handling
+        const resolvedSrc = src.startsWith('http') ? src : asset(src);
+        
         return `<figure class="image-figure">
-            <img src="${src}" alt="${alt}" class="${imageClass}"${styleAttr} loading="lazy" />
+            <img src="${resolvedSrc}" alt="${alt}" class="${imageClass}"${styleAttr} loading="lazy" />
             ${alt ? `<figcaption class="image-caption">${alt}</figcaption>` : ''}
         </figure>`;
     });

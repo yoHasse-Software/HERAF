@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { getConcepts, getPrinciple, getPrinciples, type Concept, type ConceptMetadata, type Principle } from '$lib/content';
 	import { getSidebarContext } from '$lib/sidebar-state.svelte';
+	import { resolve } from '$app/paths';
 
 	// Icon mapping for concepts
 	const iconMap: Record<string, any> = {
@@ -181,7 +182,7 @@
 					</div>
 					
 					<div class="mt-6 pt-6 border-t">
-						<a href="/vagledning" class="text-sm text-[#0D3B4F] hover:underline flex items-center">
+						<a href={resolve('/vagledning')} class="text-sm text-[#0D3B4F] hover:underline flex items-center">
 							← Tillbaka till vägledningen
 						</a>
 					</div>

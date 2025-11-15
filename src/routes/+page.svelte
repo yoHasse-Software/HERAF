@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { BookOpen, Brain, GitBranch, ArrowRight } from '@lucide/svelte';
+	import { resolve, asset } from '$app/paths';
 </script>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -52,8 +53,8 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 						</div>
 						<div class="text-gray-400 text-sm mb-4">innehåller</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-							<img src="img/guidance_logo_w_text.png" alt="Vägledningen" class="w-full max-w-48 mx-auto" />
-							<img src="img/heram_logo_w_text.png" alt="HERAM" class="w-full max-w-48 mx-auto" />
+							<img src={asset('/img/guidance_logo_w_text.png')} alt="Vägledningen" class="w-full max-w-48 mx-auto" />
+							<img src={asset('/img/heram_logo_w_text.png')} alt="HERAM" class="w-full max-w-48 mx-auto" />
 						</div>
 					</div>
 				</div>
@@ -64,7 +65,7 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 	<!-- Main Navigation Cards -->
 	<div class="grid md:grid-cols-2 gap-8 mb-16">
 		<!-- Vägledningen -->
-		<a href="/vagledning" class="group">
+		<a href={resolve('/vagledning')} class="group">
 			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#352F44] h-full">
 				<div class="flex items-center justify-between mb-6">
 					<div class="bg-[#352F44] p-3 rounded-lg">
@@ -86,7 +87,7 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 		</a>
 
 		<!-- HERAM -->
-		<a href="/heram" class="group">
+		<a href={resolve('/heram')} class="group">
 			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-[#0D3B4F] h-full">
 				<div class="flex items-center justify-between mb-6">
 					<div class="bg-[#0D3B4F] p-3 rounded-lg">

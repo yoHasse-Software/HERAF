@@ -1,13 +1,14 @@
 
 <script lang="ts">
 	export const prerender = true;
-	
+
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Home, BookOpen, Brain, GitBranch } from '@lucide/svelte';
 	import { createSidebarContext } from '$lib/sidebar-state.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
+	import { resolve } from '$app/paths';
 	
 	let { children } = $props();
 	
@@ -34,7 +35,7 @@
 			<div class="flex justify-between items-center h-16">
 				<!-- Logo/Brand -->
 				<div class="flex items-center">
-					<a href="/" class="text-2xl font-bold text-gray-900">
+					<a href={resolve('/' as any)} class="text-2xl font-bold text-gray-900">
 						<span class="text-[#352F44]">HERAF</span>
 					</a>
 				</div>
@@ -45,9 +46,9 @@
 					{@const IconComponent = item.icon}
 
 						<a 
-							href={item.path}
+							href={resolve(item.path as any)}
 							class="flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 
-								{$page.url.pathname === item.path 
+								{page.url.pathname === item.path 
 									? 'text-[#352F44] bg-[#352F44]/10' 
 									: 'text-gray-600 hover:text-[#352F44] hover:bg-gray-100'}"
 						>
