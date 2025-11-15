@@ -22,11 +22,18 @@ function processMarkdownFile(filePath) {
 
 function buildContentData() {
   const contentDir = path.join(process.cwd(), 'src/content');
-  const principlesDir = path.join(contentDir, 'principles');
+  const governanceDir = path.join(contentDir, 'governance');
+  const principlesDir = path.join(governanceDir, 'principles');
+  const rulesDir = path.join(governanceDir, 'rules');
+  const guidelinesDir = path.join(governanceDir, 'guidelines');
   const conceptsDir = path.join(contentDir, 'concepts');
   
   const data = {
-    principles: [],
+    governance: {
+      principles: [],
+      rules: [],
+      guidelines: []
+    },
     concepts: []
   };
   
@@ -37,9 +44,37 @@ function buildContentData() {
       const filePath = path.join(principlesDir, file);
       try {
         const principle = processMarkdownFile(filePath);
-        data.principles.push(principle);
+        data.governance.principles.push(principle);
       } catch (error) {
         console.error(`Error processing principle ${file}:`, error);
+      }
+    }
+  }
+  
+  // Process rules
+  if (fs.existsSync(rulesDir)) {
+    const ruleFiles = fs.readdirSync(rulesDir).filter(f => f.endsWith('.md'));
+    for (const file of ruleFiles) {
+      const filePath = path.join(rulesDir, file);
+      try {
+        const rule = processMarkdownFile(filePath);
+        data.governance.rules.push(rule);
+      } catch (error) {
+        console.error(`Error processing rule ${file}:`, error);
+      }
+    }
+  }
+  
+  // Process guidelines
+  if (fs.existsSync(guidelinesDir)) {
+    const guidelineFiles = fs.readdirSync(guidelinesDir).filter(f => f.endsWith('.md'));
+    for (const file of guidelineFiles) {
+      const filePath = path.join(guidelinesDir, file);
+      try {
+        const guideline = processMarkdownFile(filePath);
+        data.governance.guidelines.push(guideline);
+      } catch (error) {
+        console.error(`Error processing guideline ${file}:`, error);
       }
     }
   }
@@ -58,12 +93,26 @@ function buildContentData() {
     }
   }
   
-  // Sort principles
-  data.principles.sort((a, b) => {
+  // Sort governance items
+  data.governance.principles.sort((a, b) => {
     if (a.metadata.status !== b.metadata.status) {
       return a.metadata.status === 'active' ? -1 : 1;
     }
     return a.metadata.principle.localeCompare(b.metadata.principle);
+  });
+  
+  data.governance.rules.sort((a, b) => {
+    if (a.metadata.status !== b.metadata.status) {
+      return a.metadata.status === 'active' ? -1 : 1;
+    }
+    return a.metadata.id.localeCompare(b.metadata.id);
+  });
+  
+  data.governance.guidelines.sort((a, b) => {
+    if (a.metadata.status !== b.metadata.status) {
+      return a.metadata.status === 'active' ? -1 : 1;
+    }
+    return a.metadata.id.localeCompare(b.metadata.id);
   });
   
   return data;
@@ -87,4 +136,4 @@ export const contentData = ${JSON.stringify(contentData, null, 2)};
 
 fs.writeFileSync(outputFile, content);
 console.log('✅ Content data generated successfully at', outputFile);
-console.log(`📊 Generated ${contentData.principles.length} principles and ${contentData.concepts.length} concepts`);
+console.log(`📊 Generated ${contentData.governance.principles.length} principles, ${contentData.governance.rules.length} rules, ${contentData.governance.guidelines.length} guidelines, and ${contentData.concepts.length} concepts`);

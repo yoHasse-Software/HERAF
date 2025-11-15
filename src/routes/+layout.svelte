@@ -4,7 +4,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
-	import { Home, BookOpen, Brain, GitBranch } from '@lucide/svelte';
+	import { Home, BookOpen, Brain, GitBranch, Shield, FileText } from '@lucide/svelte';
 	import { createSidebarContext } from '$lib/sidebar-state.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 	import { resolve } from '$app/paths';
@@ -18,6 +18,8 @@
 		{ path: '/', label: 'Start', icon: Home, description: 'Portalen' },
 		{ path: '/vagledning', label: 'Vägledning', icon: BookOpen, description: 'Levande dokument' },
 		{ path: '/heram', label: 'HERAM', icon: Brain, description: 'Interaktiv modell' },
+		{ path: '/styrning', label: 'Styrning', icon: Shield, description: 'Principer & regler' },
+		{ path: '/begrepp', label: 'Begrepp', icon: FileText, description: 'Begreppsmodell' }
 		// { path: '/process', label: 'Processen', icon: GitBranch, description: 'Skapa referensarkitektur' }
 	];
 </script>

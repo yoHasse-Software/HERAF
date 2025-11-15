@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BookOpen, Brain, GitBranch, ArrowRight } from '@lucide/svelte';
+	import { BookOpen, Brain, GitBranch, ArrowRight, Shield, FileText } from '@lucide/svelte';
 	import { resolve, asset } from '$app/paths';
 </script>
 
@@ -53,8 +53,12 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 						</div>
 						<div class="text-gray-400 text-sm mb-4">innehåller</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-							<img src={asset('/img/guidance_logo_w_text.png')} alt="Vägledningen" class="w-full max-w-48 mx-auto" />
-							<img src={asset('/img/heram_logo_w_text.png')} alt="HERAM" class="w-full max-w-48 mx-auto" />
+							<a href={resolve('/vagledning')} class="hover:underline">
+								<img src={asset('/img/guidance_logo_w_text.png')} alt="Vägledningen" class="w-full max-w-48 mx-auto" />
+							</a>
+							<a href={resolve('/heram')} class="hover:underline">
+								<img src={asset('/img/heram_logo_w_text.png')} alt="HERAM" class="w-full max-w-48 mx-auto" />
+							</a>
 						</div>
 					</div>
 				</div>
@@ -109,28 +113,50 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 		</a>
 	</div>
 
-	<!-- Key Benefits -->
-	<div class="bg-gradient-to-br from-[#352F44]/5 to-[#0D3B4F]/5 rounded-xl p-8 md:p-12">
-		<h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Fördelar med HERAF</h3>
-		<div class="grid md:grid-cols-3 gap-8">
-			<div class="text-center">
-				<div class="bg-white p-6 rounded-lg shadow-sm">
-					<h4 class="font-semibold text-gray-900 mb-2">Jämförbara</h4>
-					<p class="text-gray-600 text-sm">Referensarkitekturer följer samma struktur och språk</p>
+	<!-- Governance and Concepts Section -->
+	<div class="grid md:grid-cols-2 gap-8 mb-16">
+		<!-- Styrning -->
+		<a href={resolve('/styrning')} class="group">
+			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-red-500 h-full">
+				<div class="flex items-center justify-between mb-6">
+					<div class="bg-red-500 p-3 rounded-lg">
+						<Shield class="w-8 h-8 text-white" />
+					</div>
+					<ArrowRight class="w-6 h-6 text-gray-400 group-hover:text-red-500 transition-colors" />
 				</div>
+				<h3 class="text-2xl font-bold text-red-500 mb-4">Styrning</h3>
+				<p class="text-gray-700 mb-4">
+					Principer, regler och riktlinjer som styr skapandet av referensarkitekturer.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li>• Övergripande principer</li>
+					<li>• Tvingande regler</li>
+					<li>• Vägledande riktlinjer</li>
+					<li>• Spårbar struktur</li>
+				</ul>
 			</div>
-			<div class="text-center">
-				<div class="bg-white p-6 rounded-lg shadow-sm">
-					<h4 class="font-semibold text-gray-900 mb-2">Återanvändbara</h4>
-					<p class="text-gray-600 text-sm">Gemensamma mallar och begrepp för hela sektorn</p>
+		</a>
+
+		<!-- Begrepp -->
+		<a href={resolve('/begrepp')} class="group">
+			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-blue-500 h-full">
+				<div class="flex items-center justify-between mb-6">
+					<div class="bg-blue-500 p-3 rounded-lg">
+						<FileText class="w-8 h-8 text-white" />
+					</div>
+					<ArrowRight class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
 				</div>
+				<h3 class="text-2xl font-bold text-blue-500 mb-4">Begreppsmodell</h3>
+				<p class="text-gray-700 mb-4">
+					Definitioner och begrepp som används inom HERAM för gemensam förståelse.
+				</p>
+				<ul class="space-y-2 text-sm text-gray-600">
+					<li>• Strukturerade definitioner</li>
+					<li>• Kategoriserade begrepp</li>
+					<li>• Gemensam terminologi</li>
+					<li>• Konsistent förståelse</li>
+				</ul>
 			</div>
-			<div class="text-center">
-				<div class="bg-white p-6 rounded-lg shadow-sm">
-					<h4 class="font-semibold text-gray-900 mb-2">Underhållsbara</h4>
-					<p class="text-gray-600 text-sm">Tydlig process och dokumentationsstruktur</p>
-				</div>
-			</div>
-		</div>
+		</a>
 	</div>
 </div>
