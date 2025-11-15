@@ -41,23 +41,19 @@
 								<h3 class="text-xl font-semibold text-gray-900">
 									{concept.metadata.title || concept.slug}
 								</h3>
-								{#if concept.metadata.status === 'active'}
-									<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-										Aktiv
-									</span>
-								{/if}
+								<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+									Koncept
+								</span>
 							</div>
 							<div class="text-gray-600">
 								<div class="prose prose-sm max-w-none">
 									{@html concept.htmlContent}
 								</div>
-								{#if concept.metadata.tags && concept.metadata.tags.length > 0}
+								{#if concept.metadata.category}
 									<div class="flex flex-wrap gap-1 mt-4">
-										{#each concept.metadata.tags as tag}
-											<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-												{tag}
-											</span>
-										{/each}
+										<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+											{concept.metadata.category}
+										</span>
 									</div>
 								{/if}
 							</div>

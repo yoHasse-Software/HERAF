@@ -142,12 +142,6 @@ HERAM-modellen säkerställer att alla referensarkitekturer inom HERAF:
 Modellen är resultatet av omfattande analys av befintliga arkitekturramverk och anpassning till högskolesektorns specifika behov.
 
 
-```note Nästa steg
-
-För att utforska HERAM-modellen i detalj, besök [[HERAM-sektionen]](/heram) där du kan interagera med konceptkartan och utforska alla begrepp.
-
-```
-
 ---
 
 ## Skapa referensarkitektur

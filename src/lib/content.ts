@@ -59,7 +59,7 @@ function convertConceptMetadata(metadata: any): Record<string, any> {
 
 // Simple synchronous function to get all principles
 export function getPrinciples(): Principle[] {
-	return (contentData.principles as any[]).map((p: any) => ({
+	return (contentData.governance.principles as any[]).map((p: any) => ({
 		metadata: convertPrincipleMetadata(p.metadata),
 		content: p.content || '',
 		htmlContent: p.htmlContent || '',

@@ -5,6 +5,10 @@ import { marked } from 'marked';
 
 // Configure marked
 marked.use({ async: false });
+marked.setOptions({
+    gfm: true,
+    breaks: true,
+});
 
 function processMarkdownFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf-8');

@@ -113,50 +113,5 @@ Varje område innehåller även komponenter som hjälper under framtagningen. F�
 		</a>
 	</div>
 
-	<!-- Governance and Concepts Section -->
-	<div class="grid md:grid-cols-2 gap-8 mb-16">
-		<!-- Styrning -->
-		<a href={resolve('/styrning')} class="group">
-			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-red-500 h-full">
-				<div class="flex items-center justify-between mb-6">
-					<div class="bg-red-500 p-3 rounded-lg">
-						<Shield class="w-8 h-8 text-white" />
-					</div>
-					<ArrowRight class="w-6 h-6 text-gray-400 group-hover:text-red-500 transition-colors" />
-				</div>
-				<h3 class="text-2xl font-bold text-red-500 mb-4">Styrning</h3>
-				<p class="text-gray-700 mb-4">
-					Principer, regler och riktlinjer som styr skapandet av referensarkitekturer.
-				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li>• Övergripande principer</li>
-					<li>• Tvingande regler</li>
-					<li>• Vägledande riktlinjer</li>
-					<li>• Spårbar struktur</li>
-				</ul>
-			</div>
-		</a>
 
-		<!-- Begrepp -->
-		<a href={resolve('/begrepp')} class="group">
-			<div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 border-t-4 border-blue-500 h-full">
-				<div class="flex items-center justify-between mb-6">
-					<div class="bg-blue-500 p-3 rounded-lg">
-						<FileText class="w-8 h-8 text-white" />
-					</div>
-					<ArrowRight class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
-				</div>
-				<h3 class="text-2xl font-bold text-blue-500 mb-4">Begreppsmodell</h3>
-				<p class="text-gray-700 mb-4">
-					Definitioner och begrepp som används inom HERAM för gemensam förståelse.
-				</p>
-				<ul class="space-y-2 text-sm text-gray-600">
-					<li>• Strukturerade definitioner</li>
-					<li>• Kategoriserade begrepp</li>
-					<li>• Gemensam terminologi</li>
-					<li>• Konsistent förståelse</li>
-				</ul>
-			</div>
-		</a>
-	</div>
 </div>

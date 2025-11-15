@@ -1,1 +1,81 @@
 @import 'tailwindcss';
+
+/* Custom prose styling for concept content */
+.concept-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  line-height: 1.4;
+}
+
+.concept-content h1:first-child {
+  margin-top: 0;
+}
+
+.concept-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  margin-top: 1.25rem;
+  line-height: 1.4;
+}
+
+.concept-content h3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+
+.concept-content ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.concept-content ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.concept-content li {
+  color: #4b5563;
+  margin-bottom: 0.25rem;
+  line-height: 1.6;
+}
+
+.concept-content p {
+  color: #4b5563;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+
+.concept-content strong {
+  font-weight: 600;
+  color: #374151;
+}
+
+.concept-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.concept-content a:hover {
+  color: #1d4ed8;
+}
+
+.concept-content code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', monospace;
+}
