@@ -1,113 +1,58 @@
 <script lang="ts">
-	import { Brain, Eye, Shield, Zap, Users, FileText, ArrowRight, Info, X } from '@lucide/svelte';
+	import { Brain, Eye, Shield, Zap, Users, FileText, ArrowRight, Info, X, Archive, Target, Layers, Map, Compass, AlertCircle, Puzzle, BookOpen, Navigation } from '@lucide/svelte';
 	import { onMount } from 'svelte';
-	
-	let selectedConcept = $state(null);
-	let showConceptModal = $state(false);
-	let selectedPrinciple = $state(null);
-	let showPrincipleModal = $state(false);
-	
-	const concepts = {
-		'view': {
-			title: 'Vy (View)',
-			icon: Eye,
-			description: 'En representation av ett system från perspektivet av relaterade concerns.',
-			details: 'Vyer är specifika perspektiv på arkitekturen som fokuserar på olika aspekter som säkerhet, prestanda eller användarupplevelse. Varje vy adresserar specifika stakeholder-concerns.',
-			relationships: ['concern', 'aspect', 'stakeholder'],
-			examples: ['Säkerhetsvy', 'Integrationsvy', 'Användarvy']
-		},
-		'aspect': {
-			title: 'Aspekt',
-			icon: Shield,
-			description: 'En dimension av intresse för design av ett system.',
-			details: 'Aspekter är horisontella kvaliteter som påverkar hela systemet, som säkerhet, prestanda, eller underhållsbarhet. De genomsyrar flera vyer och komponenter.',
-			relationships: ['view', 'concern', 'principle'],
-			examples: ['Säkerhet', 'Prestanda', 'Skalbarhet', 'Underhållsbarhet']
-		},
-		'concern': {
-			title: 'Concern',
-			icon: Users,
-			description: 'Ett intresse eller fokusområde som är viktigt för systemets intressenter.',
-			details: 'Concerns representerar specifika intressen från olika stakeholders som måste adresseras i arkitekturen. De driver designbeslut och arkitekturella val.',
-			relationships: ['view', 'stakeholder', 'principle'],
-			examples: ['Datasäkerhet', 'Användarupplevelse', 'Systemintegration']
-		},
-		'principle': {
-			title: 'Princip',
-			icon: FileText,
-			description: 'En grundläggande regel eller tro som vägleder eller begränsar arkitekturella beslut.',
-			details: 'Principer är vägledande regler som hjälper arkitekter att fatta konsekventa beslut. De baseras på organisatoriska värderingar och bästa praxis.',
-			relationships: ['aspect', 'concern', 'decision'],
-			examples: ['Öppna standarder först', 'Privacy by design', 'Återanvändning över egen utveckling']
-		},
-		'stakeholder': {
-			title: 'Intressent',
-			icon: Users,
-			description: 'En individ, grupp eller organisation som har intresse i eller påverkas av arkitekturen.',
-			details: 'Intressenter inkluderar användare, utvecklare, systemadministratörer, beslutsfattare och andra som påverkas av eller kan påverka arkitekturen.',
-			relationships: ['concern', 'view'],
-			examples: ['Slutanvändare', 'IT-avdelning', 'Säkerhetsansvariga', 'Ledning']
-		},
-		'decision': {
-			title: 'Arkitekturbeslut',
-			icon: Zap,
-			description: 'Ett motiverat val mellan alternativa designlösningar.',
-			details: 'Arkitekturbeslut dokumenterar viktiga designval, deras motivering och konsekvenser. De kopplar samman principer med konkreta implementationsval.',
-			relationships: ['principle', 'rationale'],
-			examples: ['Val av integrationsmönster', 'Autentiseringsmetod', 'Databasarkitektur']
-		}
+	import { getConcepts, getPrinciple, getPrinciples, type Concept, type ConceptMetadata, type Principle } from '$lib/content';
+	import { getSidebarContext } from '$lib/sidebar-state.svelte';
+
+	// Icon mapping for concepts
+	const iconMap: Record<string, any> = {
+		'Archive': Archive,
+		'ArrowRight': ArrowRight,
+		'Target': Target,
+		'FileTemplate': BookOpen,
+		'Layers': Layers,
+		'Map': Map,
+		'Compass': Compass,
+		'Guide': Navigation,
+		'Shield': Shield,
+		'Users': Users,
+		'AlertCircle': AlertCircle,
+		'Eye': Eye,
+		'FileText': FileText,
+		'Puzzle': Puzzle
 	};
+
+	const sidebar = getSidebarContext();
+	let principles: Principle[] = $state([]);
+	let concepts: Record<string, Concept> = $state({});
 	
-	const principles = [
-		{
-			id: 'open-standards',
-			title: 'Öppna standarder först',
-			intention: 'Prioritera lösningar baserade på öppna standarder för att undvika leverantörslåsning.',
-			when: 'Vid val mellan proprietära och öppna lösningar',
-			example: 'Välj SAML över proprietära SSO-lösningar',
-			category: 'Teknisk'
-		},
-		{
-			id: 'privacy-by-design',
-			title: 'Privacy by design',
-			intention: 'Integrera integritetsskydd i alla system från grunden.',
-			when: 'Vid design av alla system som hanterar persondata',
-			example: 'Implementera dataminimering och kryptering som standard',
-			category: 'Säkerhet'
-		},
-		{
-			id: 'reuse-first',
-			title: 'Återanvändning före utveckling',
-			intention: 'Utvärdera befintliga lösningar innan ny utveckling påbörjas.',
-			when: 'Vid alla nya systeminitiativ',
-			example: 'Använd befintligt LMS istället för att utveckla nytt',
-			category: 'Ekonomi'
-		},
-		{
-			id: 'api-first',
-			title: 'API-först',
-			intention: 'Designa system med API:er som primärt gränssnitt för integration.',
-			when: 'Vid utveckling av nya system och tjänster',
-			example: 'Alla studentinformationssystem exponerar REST API:er',
-			category: 'Integration'
+	// Load principles on mount
+	onMount(async () => {
+		try {
+			principles = getPrinciples();
+		} catch (error) {
+			console.error('Error loading principles:', error);
 		}
-	];
+		// Load concepts metadata
+		try {
+			concepts = getConcepts();
+		} catch (error) {
+			console.error('Error loading concepts metadata:', error);
+		}
+	});
+
 	
-	function openConceptModal(conceptKey: string) {
-		selectedConcept = concepts[conceptKey];
-		showConceptModal = true;
+	function openConceptInSidebar(conceptSlug: string) {
+		const concept = concepts[conceptSlug];
+		if (concept) {
+			sidebar.openConcept(concept);
+		} else {
+			console.warn(`Concept not found: ${conceptSlug}`);
+		}
 	}
 	
-	function openPrincipleModal(principle: any) {
-		selectedPrinciple = principle;
-		showPrincipleModal = true;
-	}
-	
-	function closeModals() {
-		showConceptModal = false;
-		showPrincipleModal = false;
-		selectedConcept = null;
-		selectedPrinciple = null;
+	function openPrincipleInSidebar(principle: Principle) {
+		sidebar.openPrinciple(principle);
 	}
 </script>
 
@@ -139,51 +84,51 @@
 						
 						<!-- Surrounding Concepts -->
 						<button 
-							onclick={() => openConceptModal('view')}
+							onclick={() => openConceptInSidebar('vy')}
 							class="absolute top-8 left-8 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={Eye} class="w-6 h-6 mx-auto mb-2" />
+							<Eye class="w-6 h-6 mx-auto mb-2" />
 							<div class="text-sm font-medium">Vy</div>
 						</button>
 						
 						<button 
-							onclick={() => openConceptModal('aspect')}
+							onclick={() => openConceptInSidebar('aspekter')}
 							class="absolute top-8 right-8 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={Shield} class="w-6 h-6 mx-auto mb-2" />
+							<Shield class="w-6 h-6 mx-auto mb-2" />
 							<div class="text-sm font-medium">Aspekt</div>
 						</button>
 						
 						<button 
-							onclick={() => openConceptModal('concern')}
+							onclick={() => openConceptInSidebar('angelagenhet')}
 							class="absolute bottom-8 left-8 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={Users} class="w-6 h-6 mx-auto mb-2" />
-							<div class="text-sm font-medium">Concern</div>
+							<Users class="w-6 h-6 mx-auto mb-2" />
+							<div class="text-sm font-medium">Angelägenhet</div>
 						</button>
 						
 						<button 
-							onclick={() => openConceptModal('principle')}
+							onclick={() => openConceptInSidebar('styrande-principer')}
 							class="absolute bottom-8 right-8 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={FileText} class="w-6 h-6 mx-auto mb-2" />
+							<FileText class="w-6 h-6 mx-auto mb-2" />
 							<div class="text-sm font-medium">Princip</div>
 						</button>
 						
 						<button 
-							onclick={() => openConceptModal('stakeholder')}
+							onclick={() => openConceptInSidebar('intressenter')}
 							class="absolute top-1/2 left-8 transform -translate-y-1/2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={Users} class="w-6 h-6 mx-auto mb-2" />
+							<Users class="w-6 h-6 mx-auto mb-2" />
 							<div class="text-sm font-medium">Intressent</div>
 						</button>
 						
 						<button 
-							onclick={() => openConceptModal('decision')}
+							onclick={() => openConceptInSidebar('arkitekturperspektiv')}
 							class="absolute top-1/2 right-8 transform -translate-y-1/2 bg-white shadow-lg hover:shadow-xl transition-all duration-300 p-4 rounded-lg group hover:bg-[#0D3B4F] hover:text-white"
 						>
-							<svelte:component this={Zap} class="w-6 h-6 mx-auto mb-2" />
-							<div class="text-sm font-medium">Beslut</div>
+							<Zap class="w-6 h-6 mx-auto mb-2" />
+							<div class="text-sm font-medium">Perspektiv</div>
 						</button>
 						
 						<!-- Connection Lines (SVG overlay) -->
@@ -208,21 +153,30 @@
 			<div class="lg:col-span-1">
 				<div class="bg-white rounded-xl shadow-sm p-6">
 					<h3 class="text-xl font-bold text-[#0D3B4F] mb-6">Arkitekturprinciper</h3>
+					
 					<div class="space-y-4">
 						{#each principles as principle}
 							<button 
-								onclick={() => openPrincipleModal(principle)}
+								onclick={() => openPrincipleInSidebar(principle)}
 								class="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-[#0D3B4F] hover:bg-blue-50 transition-all duration-200"
 							>
 								<div class="flex justify-between items-start mb-2">
-									<h4 class="font-semibold text-gray-900 text-sm">{principle.title}</h4>
-									<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{principle.category}</span>
+									<h4 class="font-semibold text-gray-900 text-sm">{principle.metadata.principle}</h4>
+									<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{principle.metadata.status}</span>
 								</div>
-								<p class="text-gray-600 text-xs mb-2">{principle.intention.substring(0, 60)}...</p>
+								<div class="flex flex-wrap gap-1 mb-2">
+									{#each principle.metadata.tags.slice(0, 3) as tag}
+										<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{tag}</span>
+									{/each}
+								</div>
 								<div class="flex items-center text-[#0D3B4F] text-xs">
 									Läs mer <ArrowRight class="w-3 h-3 ml-1" />
 								</div>
 							</button>
+						{:else}
+							<div class="text-gray-500 text-center py-4">
+								Inga principer laddade än...
+							</div>
 						{/each}
 					</div>
 					
@@ -239,115 +193,18 @@
 		<div class="mt-8 bg-white rounded-xl shadow-sm p-8">
 			<h3 class="text-xl font-bold text-[#0D3B4F] mb-6">Snabbreferens</h3>
 			<div class="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
-				{#each Object.entries(concepts) as [key, concept]}
+				{#each Object.entries(concepts) as [slug, concept]}
+					{@const IconComponent = iconMap[concept.metadata.icon] || FileText}
 					<button 
-						onclick={() => openConceptModal(key)}
+						onclick={() => openConceptInSidebar(slug)}
 						class="p-4 border border-gray-200 rounded-lg hover:border-[#0D3B4F] hover:bg-blue-50 transition-colors text-center"
 					>
-						<svelte:component this={concept.icon} class="w-8 h-8 mx-auto mb-2 text-[#0D3B4F]" />
-						<h4 class="text-sm font-semibold text-gray-900">{concept.title}</h4>
-						<p class="text-xs text-gray-600 mt-1">{concept.description.substring(0, 40)}...</p>
+						<IconComponent class="w-8 h-8 mx-auto mb-2 text-[#0D3B4F]" />
+						<h4 class="text-sm font-semibold text-gray-900">{concept.metadata.title}</h4>
+						<!-- <p class="text-xs text-gray-600 mt-1">{@html concept.htmlContent.substring(0, 40)}...</p> -->
 					</button>
 				{/each}
 			</div>
 		</div>
 	</div>
 </div>
-
-<!-- Concept Modal -->
-{#if showConceptModal && selectedConcept}
-	<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-		<div class="bg-white rounded-xl max-w-2xl w-full p-8 max-h-96 overflow-y-auto">
-			<div class="flex justify-between items-start mb-6">
-				<div class="flex items-center">
-					<svelte:component this={selectedConcept.icon} class="w-8 h-8 mr-3 text-[#0D3B4F]" />
-					<h3 class="text-2xl font-bold text-gray-900">{selectedConcept.title}</h3>
-				</div>
-				<button onclick={closeModals} class="text-gray-400 hover:text-gray-600">
-					<X class="w-6 h-6" />
-				</button>
-			</div>
-			
-			<div class="mb-4">
-				<h4 class="font-semibold text-gray-900 mb-2">Definition</h4>
-				<p class="text-gray-700">{selectedConcept.description}</p>
-			</div>
-			
-			<div class="mb-4">
-				<h4 class="font-semibold text-gray-900 mb-2">Fördjupning</h4>
-				<p class="text-gray-700">{selectedConcept.details}</p>
-			</div>
-			
-			<div class="mb-4">
-				<h4 class="font-semibold text-gray-900 mb-2">Relationer</h4>
-				<div class="flex flex-wrap gap-2">
-					{#each selectedConcept.relationships as relation}
-						<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-							{concepts[relation]?.title || relation}
-						</span>
-					{/each}
-				</div>
-			</div>
-			
-			<div class="mb-6">
-				<h4 class="font-semibold text-gray-900 mb-2">Exempel</h4>
-				<ul class="space-y-1">
-					{#each selectedConcept.examples as example}
-						<li class="text-gray-700 text-sm">• {example}</li>
-					{/each}
-				</ul>
-			</div>
-			
-			<div class="flex space-x-3">
-				<button onclick={closeModals} class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-					Stäng
-				</button>
-				<a href="/vagledning" class="px-4 py-2 bg-[#0D3B4F] text-white rounded-lg hover:bg-[#456882] transition-colors">
-					Se i vägledningen
-				</a>
-			</div>
-		</div>
-	</div>
-{/if}
-
-<!-- Principle Modal -->
-{#if showPrincipleModal && selectedPrinciple}
-	<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-		<div class="bg-white rounded-xl max-w-lg w-full p-8">
-			<div class="flex justify-between items-start mb-6">
-				<h3 class="text-xl font-bold text-gray-900">{selectedPrinciple.title}</h3>
-				<button onclick={closeModals} class="text-gray-400 hover:text-gray-600">
-					<X class="w-6 h-6" />
-				</button>
-			</div>
-			
-			<div class="mb-4">
-				<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">{selectedPrinciple.category}</span>
-			</div>
-			
-			<div class="mb-4">
-				<h4 class="font-semibold text-gray-900 mb-2">Intention</h4>
-				<p class="text-gray-700">{selectedPrinciple.intention}</p>
-			</div>
-			
-			<div class="mb-4">
-				<h4 class="font-semibold text-gray-900 mb-2">När ska den användas?</h4>
-				<p class="text-gray-700">{selectedPrinciple.when}</p>
-			</div>
-			
-			<div class="mb-6">
-				<h4 class="font-semibold text-gray-900 mb-2">Exempel</h4>
-				<p class="text-gray-700 italic">"{selectedPrinciple.example}"</p>
-			</div>
-			
-			<div class="flex space-x-3">
-				<button onclick={closeModals} class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
-					Stäng
-				</button>
-				<button class="px-4 py-2 bg-[#0D3B4F] text-white rounded-lg hover:bg-[#456882] transition-colors">
-					Använd principen
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}

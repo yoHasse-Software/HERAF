@@ -1,0 +1,11 @@
+{
+    "chat.mcp.serverSampling": {
+        "HERAF/.vscode/mcp.json: svelte": {
+            "allowedModels": [
+                "copilot/gpt-5-mini",
+                "copilot/claude-sonnet-4",
+                "copilot/claude-sonnet-4.5"
+            ]
+        }
+    }
+}

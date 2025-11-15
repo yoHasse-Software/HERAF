@@ -8,6 +8,9 @@ node_modules
 /.svelte-kit
 /build
 
+# Generated content files
+/src/lib/content-data.generated.ts
+
 # OS
 .DS_Store
 Thumbs.db
@@ -21,3 +24,4 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+HERAF - Vägledning.pdf
