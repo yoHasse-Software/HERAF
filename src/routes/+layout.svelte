@@ -2,7 +2,7 @@
 <script lang="ts">
 
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.webp';
+	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { Home, BookOpen, Brain } from '@lucide/svelte';
 	import { createSidebarContext } from '$lib/sidebar-state.svelte';
@@ -57,7 +57,7 @@
 					</a>
 					<div class="hidden sm:block h-8 w-px bg-gray-300"></div>
 					<img 
-						src="/img/itcf-logga.png" 
+						src="/img/itcf-logga.svg" 
 						alt="ITCF Logotyp" 
 						class="h-8 w-auto max-w-none object-contain"
 						style="max-height: 32px;"
