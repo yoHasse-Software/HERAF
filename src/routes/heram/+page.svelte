@@ -84,6 +84,23 @@
 
 <div class="min-h-screen bg-gray-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+		<!-- Development Notice -->
+		<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+			<div class="flex items-start">
+				<div class="flex-shrink-0">
+					<svg class="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+					</svg>
+				</div>
+				<div class="ml-2 sm:ml-3">
+					<h3 class="text-xs sm:text-sm font-medium text-amber-800">Modell under utveckling</h3>
+					<div class="mt-1 text-xs sm:text-sm text-amber-700">
+						<p>HERAM-modellen och dess koncept utvecklas kontinuerligt. Definitioner och strukturer kan komma att justeras.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Page Header -->
 		<div class="bg-gradient-to-r from-[#0D3B4F] to-[#456882] rounded-xl shadow-sm p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 text-white">
 			<div class="flex items-center mb-3 sm:mb-4">

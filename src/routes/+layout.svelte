@@ -2,7 +2,7 @@
 <script lang="ts">
 
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.webp';
 	import { page } from '$app/state';
 	import { Home, BookOpen, Brain } from '@lucide/svelte';
 	import { createSidebarContext } from '$lib/sidebar-state.svelte';
@@ -51,10 +51,17 @@
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex justify-between items-center h-16">
 				<!-- Logo/Brand -->
-				<div class="flex items-center">
+				<div class="flex items-center space-x-4">
 					<a href="/" class="text-2xl font-bold text-gray-900">
 						<span class="text-[#352F44]">HERAF</span>
 					</a>
+					<div class="hidden sm:block h-8 w-px bg-gray-300"></div>
+					<img 
+						src="/img/itcf-logga.png" 
+						alt="ITCF Logotyp" 
+						class="h-8 w-auto max-w-none object-contain"
+						style="max-height: 32px;"
+					/>
 				</div>
 				
 				<!-- Navigation -->
@@ -149,6 +156,19 @@
 	<!-- Footer -->
 	<footer class="bg-gray-900 text-white mt-16">
 		<div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+			<!-- Development Notice in Footer -->
+			<div class="border border-amber-600 bg-amber-900/20 rounded-lg p-4 mb-8">
+				<div class="flex items-center">
+					<svg class="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+					</svg>
+					<div>
+						<h4 class="text-sm font-medium text-amber-200">Beta-version</h4>
+						<p class="text-sm text-gray-300 mt-1">HERAF befinner sig för närvarande i utvecklingsfas. Allt innehåll ska betraktas som preliminärt och kan komma att förändras.</p>
+					</div>
+				</div>
+			</div>
+			
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 				<div>
 					<h3 class="text-lg font-semibold mb-4">HERAF</h3>
